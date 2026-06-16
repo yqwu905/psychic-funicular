@@ -1,5 +1,7 @@
 # 构建产物
 /bin/
+/build/
+/dist/
 *.exe
 
 # 运行时数据

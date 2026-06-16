@@ -115,7 +115,8 @@ flowchart LR
 
 ## 快速上手
 
-需要 Go 1.25+。
+> 预编译二进制（linux **amd64 / arm64**）见 [Releases](../../releases)，下载解压即用；
+> 推送 `v*` 标签即由 GitHub Actions 自动构建发布。从源码构建需 Go 1.25+：
 
 ```bash
 # 1) 编译三个二进制到 bin/

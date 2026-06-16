@@ -1,0 +1,67 @@
+name: Release
+
+# 推送 v* 标签(如 v0.1.0)时构建并发布；也可手动触发并指定标签。
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag, e.g. v0.1.0"
+        required: true
+
+permissions:
+  contents: write # 创建 Release 需要
+
+env:
+  # 标签推送取 ref_name；手动触发取输入。
+  VERSION: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+
+      - name: Test
+        run: go test ./...
+
+      # gen/ 下的 gRPC 代码已提交，无需 buf。modernc.org/sqlite 为纯 Go，
+      # 关闭 CGO 即可静态交叉编译 amd64(x86_64) 与 arm64(aarch64)。
+      - name: Build linux amd64 + arm64
+        env:
+          CGO_ENABLED: "0"
+          GOOS: linux
+        run: |
+          set -euo pipefail
+          ldflags="-s -w -X github.com/yqwu905/psychic-funicular/internal/version.Version=${VERSION}"
+          mkdir -p dist
+          for arch in amd64 arm64; do
+            name="skipper_${VERSION}_linux_${arch}"
+            out="build/${name}"
+            mkdir -p "${out}"
+            for cmd in skipper-server skipper-agent skctl; do
+              GOARCH="${arch}" go build -trimpath -ldflags "${ldflags}" -o "${out}/${cmd}" "./cmd/${cmd}"
+            done
+            cp README.md "${out}/"
+            cp -r deploy "${out}/deploy"
+            tar -C build -czf "dist/${name}.tar.gz" "${name}"
+          done
+          ( cd dist && sha256sum *.tar.gz > SHA256SUMS )
+          ls -lh dist
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: ${{ env.VERSION }}
+          generate_release_notes: true
+          files: |
+            dist/*.tar.gz
+            dist/SHA256SUMS
