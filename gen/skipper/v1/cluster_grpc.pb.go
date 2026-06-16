@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ClusterService_ListNodes_FullMethodName = "/skipper.v1.ClusterService/ListNodes"
+	ClusterService_ListNodes_FullMethodName   = "/skipper.v1.ClusterService/ListNodes"
+	ClusterService_ListMetrics_FullMethodName = "/skipper.v1.ClusterService/ListMetrics"
 )
 
 // ClusterServiceClient is the client API for ClusterService service.
@@ -29,6 +30,8 @@ const (
 // ClusterService 由控制平面实现，由 skctl / Web 等客户端调用。
 type ClusterServiceClient interface {
 	ListNodes(ctx context.Context, in *ListNodesRequest, opts ...grpc.CallOption) (*ListNodesResponse, error)
+	// ListMetrics 返回各节点最近一次的指标快照。
+	ListMetrics(ctx context.Context, in *ListMetricsRequest, opts ...grpc.CallOption) (*ListMetricsResponse, error)
 }
 
 type clusterServiceClient struct {
@@ -49,6 +52,16 @@ func (c *clusterServiceClient) ListNodes(ctx context.Context, in *ListNodesReque
 	return out, nil
 }
 
+func (c *clusterServiceClient) ListMetrics(ctx context.Context, in *ListMetricsRequest, opts ...grpc.CallOption) (*ListMetricsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListMetricsResponse)
+	err := c.cc.Invoke(ctx, ClusterService_ListMetrics_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ClusterServiceServer is the server API for ClusterService service.
 // All implementations must embed UnimplementedClusterServiceServer
 // for forward compatibility.
@@ -56,6 +69,8 @@ func (c *clusterServiceClient) ListNodes(ctx context.Context, in *ListNodesReque
 // ClusterService 由控制平面实现，由 skctl / Web 等客户端调用。
 type ClusterServiceServer interface {
 	ListNodes(context.Context, *ListNodesRequest) (*ListNodesResponse, error)
+	// ListMetrics 返回各节点最近一次的指标快照。
+	ListMetrics(context.Context, *ListMetricsRequest) (*ListMetricsResponse, error)
 	mustEmbedUnimplementedClusterServiceServer()
 }
 
@@ -68,6 +83,9 @@ type UnimplementedClusterServiceServer struct{}
 
 func (UnimplementedClusterServiceServer) ListNodes(context.Context, *ListNodesRequest) (*ListNodesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListNodes not implemented")
+}
+func (UnimplementedClusterServiceServer) ListMetrics(context.Context, *ListMetricsRequest) (*ListMetricsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListMetrics not implemented")
 }
 func (UnimplementedClusterServiceServer) mustEmbedUnimplementedClusterServiceServer() {}
 func (UnimplementedClusterServiceServer) testEmbeddedByValue()                        {}
@@ -108,6 +126,24 @@ func _ClusterService_ListNodes_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ClusterService_ListMetrics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMetricsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClusterServiceServer).ListMetrics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ClusterService_ListMetrics_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClusterServiceServer).ListMetrics(ctx, req.(*ListMetricsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ClusterService_ServiceDesc is the grpc.ServiceDesc for ClusterService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -118,6 +154,10 @@ var ClusterService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListNodes",
 			Handler:    _ClusterService_ListNodes_Handler,
+		},
+		{
+			MethodName: "ListMetrics",
+			Handler:    _ClusterService_ListMetrics_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

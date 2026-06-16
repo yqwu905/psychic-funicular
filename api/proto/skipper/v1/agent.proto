@@ -3,14 +3,16 @@ syntax = "proto3";
 package skipper.v1;
 
 import "skipper/v1/common.proto";
+import "skipper/v1/metrics.proto";
 
 option go_package = "github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1";
 
 // AgentService 由控制平面实现，由节点上的 Agent 调用。
-// M0 只包含注册与心跳；指标流/作业下发在后续里程碑加入。
 service AgentService {
   rpc RegisterNode(RegisterNodeRequest) returns (RegisterNodeResponse);
   rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  // ReportMetrics 周期上报一次完整指标快照，同时充当存活信号。
+  rpc ReportMetrics(ReportMetricsRequest) returns (ReportMetricsResponse);
 }
 
 message RegisterNodeRequest {
@@ -27,11 +29,21 @@ message RegisterNodeResponse {
 
 message HeartbeatRequest {
   string node_id = 1;
-  Resources resources = 2;     // 刷新的实时资源（M0 可与注册时一致）
+  Resources resources = 2;
 }
 
 message HeartbeatResponse {
   bool ok = 1;
-  // 节点未知时置真，提示 Agent 重新注册（如 server 重启丢状态）。
+  bool should_reregister = 2;
+}
+
+message ReportMetricsRequest {
+  string node_id = 1;
+  MetricsSnapshot snapshot = 2;
+}
+
+message ReportMetricsResponse {
+  bool ok = 1;
+  // 节点未知时置真（如 server 重启丢状态），提示 Agent 重新注册。
   bool should_reregister = 2;
 }

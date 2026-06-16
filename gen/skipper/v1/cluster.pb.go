@@ -101,17 +101,183 @@ func (x *ListNodesResponse) GetNodes() []*Node {
 	return nil
 }
 
+type NodeMetrics struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	NodeId        string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	NodeName      string                 `protobuf:"bytes,2,opt,name=node_name,json=nodeName,proto3" json:"node_name,omitempty"`
+	Partition     string                 `protobuf:"bytes,3,opt,name=partition,proto3" json:"partition,omitempty"`
+	State         string                 `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
+	Snapshot      *MetricsSnapshot       `protobuf:"bytes,5,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NodeMetrics) Reset() {
+	*x = NodeMetrics{}
+	mi := &file_skipper_v1_cluster_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NodeMetrics) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NodeMetrics) ProtoMessage() {}
+
+func (x *NodeMetrics) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_cluster_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NodeMetrics.ProtoReflect.Descriptor instead.
+func (*NodeMetrics) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_cluster_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *NodeMetrics) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *NodeMetrics) GetNodeName() string {
+	if x != nil {
+		return x.NodeName
+	}
+	return ""
+}
+
+func (x *NodeMetrics) GetPartition() string {
+	if x != nil {
+		return x.Partition
+	}
+	return ""
+}
+
+func (x *NodeMetrics) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *NodeMetrics) GetSnapshot() *MetricsSnapshot {
+	if x != nil {
+		return x.Snapshot
+	}
+	return nil
+}
+
+type ListMetricsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListMetricsRequest) Reset() {
+	*x = ListMetricsRequest{}
+	mi := &file_skipper_v1_cluster_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListMetricsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListMetricsRequest) ProtoMessage() {}
+
+func (x *ListMetricsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_cluster_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListMetricsRequest.ProtoReflect.Descriptor instead.
+func (*ListMetricsRequest) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_cluster_proto_rawDescGZIP(), []int{3}
+}
+
+type ListMetricsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Nodes         []*NodeMetrics         `protobuf:"bytes,1,rep,name=nodes,proto3" json:"nodes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListMetricsResponse) Reset() {
+	*x = ListMetricsResponse{}
+	mi := &file_skipper_v1_cluster_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListMetricsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListMetricsResponse) ProtoMessage() {}
+
+func (x *ListMetricsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_cluster_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListMetricsResponse.ProtoReflect.Descriptor instead.
+func (*ListMetricsResponse) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_cluster_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ListMetricsResponse) GetNodes() []*NodeMetrics {
+	if x != nil {
+		return x.Nodes
+	}
+	return nil
+}
+
 var File_skipper_v1_cluster_proto protoreflect.FileDescriptor
 
 const file_skipper_v1_cluster_proto_rawDesc = "" +
 	"\n" +
 	"\x18skipper/v1/cluster.proto\x12\n" +
-	"skipper.v1\x1a\x17skipper/v1/common.proto\"\x12\n" +
+	"skipper.v1\x1a\x17skipper/v1/common.proto\x1a\x18skipper/v1/metrics.proto\"\x12\n" +
 	"\x10ListNodesRequest\";\n" +
 	"\x11ListNodesResponse\x12&\n" +
-	"\x05nodes\x18\x01 \x03(\v2\x10.skipper.v1.NodeR\x05nodes2Z\n" +
+	"\x05nodes\x18\x01 \x03(\v2\x10.skipper.v1.NodeR\x05nodes\"\xb0\x01\n" +
+	"\vNodeMetrics\x12\x17\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x1b\n" +
+	"\tnode_name\x18\x02 \x01(\tR\bnodeName\x12\x1c\n" +
+	"\tpartition\x18\x03 \x01(\tR\tpartition\x12\x14\n" +
+	"\x05state\x18\x04 \x01(\tR\x05state\x127\n" +
+	"\bsnapshot\x18\x05 \x01(\v2\x1b.skipper.v1.MetricsSnapshotR\bsnapshot\"\x14\n" +
+	"\x12ListMetricsRequest\"D\n" +
+	"\x13ListMetricsResponse\x12-\n" +
+	"\x05nodes\x18\x01 \x03(\v2\x17.skipper.v1.NodeMetricsR\x05nodes2\xaa\x01\n" +
 	"\x0eClusterService\x12H\n" +
-	"\tListNodes\x12\x1c.skipper.v1.ListNodesRequest\x1a\x1d.skipper.v1.ListNodesResponseB?Z=github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1b\x06proto3"
+	"\tListNodes\x12\x1c.skipper.v1.ListNodesRequest\x1a\x1d.skipper.v1.ListNodesResponse\x12N\n" +
+	"\vListMetrics\x12\x1e.skipper.v1.ListMetricsRequest\x1a\x1f.skipper.v1.ListMetricsResponseB?Z=github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1b\x06proto3"
 
 var (
 	file_skipper_v1_cluster_proto_rawDescOnce sync.Once
@@ -125,21 +291,29 @@ func file_skipper_v1_cluster_proto_rawDescGZIP() []byte {
 	return file_skipper_v1_cluster_proto_rawDescData
 }
 
-var file_skipper_v1_cluster_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_skipper_v1_cluster_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_skipper_v1_cluster_proto_goTypes = []any{
-	(*ListNodesRequest)(nil),  // 0: skipper.v1.ListNodesRequest
-	(*ListNodesResponse)(nil), // 1: skipper.v1.ListNodesResponse
-	(*Node)(nil),              // 2: skipper.v1.Node
+	(*ListNodesRequest)(nil),    // 0: skipper.v1.ListNodesRequest
+	(*ListNodesResponse)(nil),   // 1: skipper.v1.ListNodesResponse
+	(*NodeMetrics)(nil),         // 2: skipper.v1.NodeMetrics
+	(*ListMetricsRequest)(nil),  // 3: skipper.v1.ListMetricsRequest
+	(*ListMetricsResponse)(nil), // 4: skipper.v1.ListMetricsResponse
+	(*Node)(nil),                // 5: skipper.v1.Node
+	(*MetricsSnapshot)(nil),     // 6: skipper.v1.MetricsSnapshot
 }
 var file_skipper_v1_cluster_proto_depIdxs = []int32{
-	2, // 0: skipper.v1.ListNodesResponse.nodes:type_name -> skipper.v1.Node
-	0, // 1: skipper.v1.ClusterService.ListNodes:input_type -> skipper.v1.ListNodesRequest
-	1, // 2: skipper.v1.ClusterService.ListNodes:output_type -> skipper.v1.ListNodesResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	5, // 0: skipper.v1.ListNodesResponse.nodes:type_name -> skipper.v1.Node
+	6, // 1: skipper.v1.NodeMetrics.snapshot:type_name -> skipper.v1.MetricsSnapshot
+	2, // 2: skipper.v1.ListMetricsResponse.nodes:type_name -> skipper.v1.NodeMetrics
+	0, // 3: skipper.v1.ClusterService.ListNodes:input_type -> skipper.v1.ListNodesRequest
+	3, // 4: skipper.v1.ClusterService.ListMetrics:input_type -> skipper.v1.ListMetricsRequest
+	1, // 5: skipper.v1.ClusterService.ListNodes:output_type -> skipper.v1.ListNodesResponse
+	4, // 6: skipper.v1.ClusterService.ListMetrics:output_type -> skipper.v1.ListMetricsResponse
+	5, // [5:7] is the sub-list for method output_type
+	3, // [3:5] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_skipper_v1_cluster_proto_init() }
@@ -148,13 +322,14 @@ func file_skipper_v1_cluster_proto_init() {
 		return
 	}
 	file_skipper_v1_common_proto_init()
+	file_skipper_v1_metrics_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_skipper_v1_cluster_proto_rawDesc), len(file_skipper_v1_cluster_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

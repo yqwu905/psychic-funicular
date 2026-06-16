@@ -144,7 +144,7 @@ func (x *RegisterNodeResponse) GetNodeId() string {
 type HeartbeatRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	NodeId        string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
-	Resources     *Resources             `protobuf:"bytes,2,opt,name=resources,proto3" json:"resources,omitempty"` // 刷新的实时资源（M0 可与注册时一致）
+	Resources     *Resources             `protobuf:"bytes,2,opt,name=resources,proto3" json:"resources,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -194,10 +194,9 @@ func (x *HeartbeatRequest) GetResources() *Resources {
 }
 
 type HeartbeatResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	Ok    bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
-	// 节点未知时置真，提示 Agent 重新注册（如 server 重启丢状态）。
-	ShouldReregister bool `protobuf:"varint,2,opt,name=should_reregister,json=shouldReregister,proto3" json:"should_reregister,omitempty"`
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Ok               bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+	ShouldReregister bool                   `protobuf:"varint,2,opt,name=should_reregister,json=shouldReregister,proto3" json:"should_reregister,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -246,12 +245,117 @@ func (x *HeartbeatResponse) GetShouldReregister() bool {
 	return false
 }
 
+type ReportMetricsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	NodeId        string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	Snapshot      *MetricsSnapshot       `protobuf:"bytes,2,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReportMetricsRequest) Reset() {
+	*x = ReportMetricsRequest{}
+	mi := &file_skipper_v1_agent_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReportMetricsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReportMetricsRequest) ProtoMessage() {}
+
+func (x *ReportMetricsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_agent_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReportMetricsRequest.ProtoReflect.Descriptor instead.
+func (*ReportMetricsRequest) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_agent_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ReportMetricsRequest) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *ReportMetricsRequest) GetSnapshot() *MetricsSnapshot {
+	if x != nil {
+		return x.Snapshot
+	}
+	return nil
+}
+
+type ReportMetricsResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Ok    bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+	// 节点未知时置真（如 server 重启丢状态），提示 Agent 重新注册。
+	ShouldReregister bool `protobuf:"varint,2,opt,name=should_reregister,json=shouldReregister,proto3" json:"should_reregister,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *ReportMetricsResponse) Reset() {
+	*x = ReportMetricsResponse{}
+	mi := &file_skipper_v1_agent_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReportMetricsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReportMetricsResponse) ProtoMessage() {}
+
+func (x *ReportMetricsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_agent_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReportMetricsResponse.ProtoReflect.Descriptor instead.
+func (*ReportMetricsResponse) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_agent_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ReportMetricsResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
+func (x *ReportMetricsResponse) GetShouldReregister() bool {
+	if x != nil {
+		return x.ShouldReregister
+	}
+	return false
+}
+
 var File_skipper_v1_agent_proto protoreflect.FileDescriptor
 
 const file_skipper_v1_agent_proto_rawDesc = "" +
 	"\n" +
 	"\x16skipper/v1/agent.proto\x12\n" +
-	"skipper.v1\x1a\x17skipper/v1/common.proto\"\xa1\x02\n" +
+	"skipper.v1\x1a\x17skipper/v1/common.proto\x1a\x18skipper/v1/metrics.proto\"\xa1\x02\n" +
 	"\x13RegisterNodeRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1c\n" +
 	"\tpartition\x18\x02 \x01(\tR\tpartition\x123\n" +
@@ -268,10 +372,17 @@ const file_skipper_v1_agent_proto_rawDesc = "" +
 	"\tresources\x18\x02 \x01(\v2\x15.skipper.v1.ResourcesR\tresources\"P\n" +
 	"\x11HeartbeatResponse\x12\x0e\n" +
 	"\x02ok\x18\x01 \x01(\bR\x02ok\x12+\n" +
-	"\x11should_reregister\x18\x02 \x01(\bR\x10shouldReregister2\xab\x01\n" +
+	"\x11should_reregister\x18\x02 \x01(\bR\x10shouldReregister\"h\n" +
+	"\x14ReportMetricsRequest\x12\x17\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x127\n" +
+	"\bsnapshot\x18\x02 \x01(\v2\x1b.skipper.v1.MetricsSnapshotR\bsnapshot\"T\n" +
+	"\x15ReportMetricsResponse\x12\x0e\n" +
+	"\x02ok\x18\x01 \x01(\bR\x02ok\x12+\n" +
+	"\x11should_reregister\x18\x02 \x01(\bR\x10shouldReregister2\x81\x02\n" +
 	"\fAgentService\x12Q\n" +
 	"\fRegisterNode\x12\x1f.skipper.v1.RegisterNodeRequest\x1a .skipper.v1.RegisterNodeResponse\x12H\n" +
-	"\tHeartbeat\x12\x1c.skipper.v1.HeartbeatRequest\x1a\x1d.skipper.v1.HeartbeatResponseB?Z=github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1b\x06proto3"
+	"\tHeartbeat\x12\x1c.skipper.v1.HeartbeatRequest\x1a\x1d.skipper.v1.HeartbeatResponse\x12T\n" +
+	"\rReportMetrics\x12 .skipper.v1.ReportMetricsRequest\x1a!.skipper.v1.ReportMetricsResponseB?Z=github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1b\x06proto3"
 
 var (
 	file_skipper_v1_agent_proto_rawDescOnce sync.Once
@@ -285,28 +396,34 @@ func file_skipper_v1_agent_proto_rawDescGZIP() []byte {
 	return file_skipper_v1_agent_proto_rawDescData
 }
 
-var file_skipper_v1_agent_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_skipper_v1_agent_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_skipper_v1_agent_proto_goTypes = []any{
-	(*RegisterNodeRequest)(nil),  // 0: skipper.v1.RegisterNodeRequest
-	(*RegisterNodeResponse)(nil), // 1: skipper.v1.RegisterNodeResponse
-	(*HeartbeatRequest)(nil),     // 2: skipper.v1.HeartbeatRequest
-	(*HeartbeatResponse)(nil),    // 3: skipper.v1.HeartbeatResponse
-	nil,                          // 4: skipper.v1.RegisterNodeRequest.LabelsEntry
-	(*Resources)(nil),            // 5: skipper.v1.Resources
+	(*RegisterNodeRequest)(nil),   // 0: skipper.v1.RegisterNodeRequest
+	(*RegisterNodeResponse)(nil),  // 1: skipper.v1.RegisterNodeResponse
+	(*HeartbeatRequest)(nil),      // 2: skipper.v1.HeartbeatRequest
+	(*HeartbeatResponse)(nil),     // 3: skipper.v1.HeartbeatResponse
+	(*ReportMetricsRequest)(nil),  // 4: skipper.v1.ReportMetricsRequest
+	(*ReportMetricsResponse)(nil), // 5: skipper.v1.ReportMetricsResponse
+	nil,                           // 6: skipper.v1.RegisterNodeRequest.LabelsEntry
+	(*Resources)(nil),             // 7: skipper.v1.Resources
+	(*MetricsSnapshot)(nil),       // 8: skipper.v1.MetricsSnapshot
 }
 var file_skipper_v1_agent_proto_depIdxs = []int32{
-	5, // 0: skipper.v1.RegisterNodeRequest.resources:type_name -> skipper.v1.Resources
-	4, // 1: skipper.v1.RegisterNodeRequest.labels:type_name -> skipper.v1.RegisterNodeRequest.LabelsEntry
-	5, // 2: skipper.v1.HeartbeatRequest.resources:type_name -> skipper.v1.Resources
-	0, // 3: skipper.v1.AgentService.RegisterNode:input_type -> skipper.v1.RegisterNodeRequest
-	2, // 4: skipper.v1.AgentService.Heartbeat:input_type -> skipper.v1.HeartbeatRequest
-	1, // 5: skipper.v1.AgentService.RegisterNode:output_type -> skipper.v1.RegisterNodeResponse
-	3, // 6: skipper.v1.AgentService.Heartbeat:output_type -> skipper.v1.HeartbeatResponse
-	5, // [5:7] is the sub-list for method output_type
-	3, // [3:5] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	7, // 0: skipper.v1.RegisterNodeRequest.resources:type_name -> skipper.v1.Resources
+	6, // 1: skipper.v1.RegisterNodeRequest.labels:type_name -> skipper.v1.RegisterNodeRequest.LabelsEntry
+	7, // 2: skipper.v1.HeartbeatRequest.resources:type_name -> skipper.v1.Resources
+	8, // 3: skipper.v1.ReportMetricsRequest.snapshot:type_name -> skipper.v1.MetricsSnapshot
+	0, // 4: skipper.v1.AgentService.RegisterNode:input_type -> skipper.v1.RegisterNodeRequest
+	2, // 5: skipper.v1.AgentService.Heartbeat:input_type -> skipper.v1.HeartbeatRequest
+	4, // 6: skipper.v1.AgentService.ReportMetrics:input_type -> skipper.v1.ReportMetricsRequest
+	1, // 7: skipper.v1.AgentService.RegisterNode:output_type -> skipper.v1.RegisterNodeResponse
+	3, // 8: skipper.v1.AgentService.Heartbeat:output_type -> skipper.v1.HeartbeatResponse
+	5, // 9: skipper.v1.AgentService.ReportMetrics:output_type -> skipper.v1.ReportMetricsResponse
+	7, // [7:10] is the sub-list for method output_type
+	4, // [4:7] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_skipper_v1_agent_proto_init() }
@@ -315,13 +432,14 @@ func file_skipper_v1_agent_proto_init() {
 		return
 	}
 	file_skipper_v1_common_proto_init()
+	file_skipper_v1_metrics_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_skipper_v1_agent_proto_rawDesc), len(file_skipper_v1_agent_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

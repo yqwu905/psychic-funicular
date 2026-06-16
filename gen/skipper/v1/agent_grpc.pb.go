@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AgentService_RegisterNode_FullMethodName = "/skipper.v1.AgentService/RegisterNode"
-	AgentService_Heartbeat_FullMethodName    = "/skipper.v1.AgentService/Heartbeat"
+	AgentService_RegisterNode_FullMethodName  = "/skipper.v1.AgentService/RegisterNode"
+	AgentService_Heartbeat_FullMethodName     = "/skipper.v1.AgentService/Heartbeat"
+	AgentService_ReportMetrics_FullMethodName = "/skipper.v1.AgentService/ReportMetrics"
 )
 
 // AgentServiceClient is the client API for AgentService service.
@@ -28,10 +29,11 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
 // AgentService 由控制平面实现，由节点上的 Agent 调用。
-// M0 只包含注册与心跳；指标流/作业下发在后续里程碑加入。
 type AgentServiceClient interface {
 	RegisterNode(ctx context.Context, in *RegisterNodeRequest, opts ...grpc.CallOption) (*RegisterNodeResponse, error)
 	Heartbeat(ctx context.Context, in *HeartbeatRequest, opts ...grpc.CallOption) (*HeartbeatResponse, error)
+	// ReportMetrics 周期上报一次完整指标快照，同时充当存活信号。
+	ReportMetrics(ctx context.Context, in *ReportMetricsRequest, opts ...grpc.CallOption) (*ReportMetricsResponse, error)
 }
 
 type agentServiceClient struct {
@@ -62,15 +64,26 @@ func (c *agentServiceClient) Heartbeat(ctx context.Context, in *HeartbeatRequest
 	return out, nil
 }
 
+func (c *agentServiceClient) ReportMetrics(ctx context.Context, in *ReportMetricsRequest, opts ...grpc.CallOption) (*ReportMetricsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReportMetricsResponse)
+	err := c.cc.Invoke(ctx, AgentService_ReportMetrics_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AgentServiceServer is the server API for AgentService service.
 // All implementations must embed UnimplementedAgentServiceServer
 // for forward compatibility.
 //
 // AgentService 由控制平面实现，由节点上的 Agent 调用。
-// M0 只包含注册与心跳；指标流/作业下发在后续里程碑加入。
 type AgentServiceServer interface {
 	RegisterNode(context.Context, *RegisterNodeRequest) (*RegisterNodeResponse, error)
 	Heartbeat(context.Context, *HeartbeatRequest) (*HeartbeatResponse, error)
+	// ReportMetrics 周期上报一次完整指标快照，同时充当存活信号。
+	ReportMetrics(context.Context, *ReportMetricsRequest) (*ReportMetricsResponse, error)
 	mustEmbedUnimplementedAgentServiceServer()
 }
 
@@ -86,6 +99,9 @@ func (UnimplementedAgentServiceServer) RegisterNode(context.Context, *RegisterNo
 }
 func (UnimplementedAgentServiceServer) Heartbeat(context.Context, *HeartbeatRequest) (*HeartbeatResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Heartbeat not implemented")
+}
+func (UnimplementedAgentServiceServer) ReportMetrics(context.Context, *ReportMetricsRequest) (*ReportMetricsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReportMetrics not implemented")
 }
 func (UnimplementedAgentServiceServer) mustEmbedUnimplementedAgentServiceServer() {}
 func (UnimplementedAgentServiceServer) testEmbeddedByValue()                      {}
@@ -144,6 +160,24 @@ func _AgentService_Heartbeat_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AgentService_ReportMetrics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReportMetricsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentServiceServer).ReportMetrics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentService_ReportMetrics_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentServiceServer).ReportMetrics(ctx, req.(*ReportMetricsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AgentService_ServiceDesc is the grpc.ServiceDesc for AgentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -158,6 +192,10 @@ var AgentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Heartbeat",
 			Handler:    _AgentService_Heartbeat_Handler,
+		},
+		{
+			MethodName: "ReportMetrics",
+			Handler:    _AgentService_ReportMetrics_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

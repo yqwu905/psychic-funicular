@@ -12,12 +12,13 @@
 - ✅ `skctl nodes` 展示节点；Dockerfile + docker-compose。
 - ✅ **已演示**：server 起 → agent 注册 → `skctl nodes` 看到节点（端到端跑通）。
 
-### M1 — 监控 MVP
-- 采集器接口 + CPU/内存/磁盘 + NVIDIA GPU（NVML，降级 nvidia-smi）。
-- 昇腾 NPU 采集（`npu-smi info`，统一到 `Device` 抽象）。
-- Agent 周期采样、批量上报；Server 指标存储与查询。
-- Prometheus 端点；`skctl nodes`/`skctl gpu`/`skctl npu` 展示实时资源。
-- **可演示**：实时看到各节点 CPU/内存/磁盘/GPU/NPU 利用率。
+### M1 — 监控 MVP ✅（已完成）
+- ✅ 采集器接口 + CPU/内存/磁盘（gopsutil）。
+- ✅ GPU 采集（解析 nvidia-smi CSV，免 cgo、静态二进制；NVML 留作可选增强）。
+- ✅ 昇腾 NPU 采集（解析 `npu-smi info`，统一到设备抽象，附解析单测）。
+- ✅ Agent 注册即上报 + 周期采样；Server 近线指标存储 + `ListMetrics` 查询。
+- ✅ Prometheus `/metrics` 端点；`skctl top`/`gpu`/`npu` 展示实时资源。
+- ✅ **已演示**：实时看到各节点 CPU/内存/磁盘利用率（有卡环境同样可见 GPU/NPU）。
 
 ### M2 — 调度 MVP
 - node/partition/job/allocation 模型与状态机。

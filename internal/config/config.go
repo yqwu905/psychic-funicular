@@ -38,6 +38,9 @@ type ServerConfig struct {
 		Driver string `yaml:"driver"`
 		DSN    string `yaml:"dsn"`
 	} `yaml:"store"`
+	Metrics struct {
+		HTTP string `yaml:"http"` // Prometheus 端点监听地址；空则不启用
+	} `yaml:"metrics"`
 	Heartbeat struct {
 		Timeout      Duration `yaml:"timeout"`       // 超过该时长未心跳判定 DOWN
 		ReapInterval Duration `yaml:"reap_interval"` // 巡检失联节点的周期
@@ -53,6 +56,7 @@ func DefaultServer() ServerConfig {
 	c.Listen.GRPC = ":7443"
 	c.Store.Driver = "sqlite"
 	c.Store.DSN = "skipper.db"
+	c.Metrics.HTTP = ":9100"
 	c.Heartbeat.Timeout = Duration(30 * time.Second)
 	c.Heartbeat.ReapInterval = Duration(10 * time.Second)
 	c.Log.Level = "info"
@@ -76,6 +80,9 @@ func LoadServer(path string) (ServerConfig, error) {
 	}
 	if v := os.Getenv("SKIPPER_STORE_DSN"); v != "" {
 		c.Store.DSN = v
+	}
+	if v := os.Getenv("SKIPPER_METRICS_HTTP"); v != "" {
+		c.Metrics.HTTP = v
 	}
 	if v := os.Getenv("SKIPPER_LOG_LEVEL"); v != "" {
 		c.Log.Level = v

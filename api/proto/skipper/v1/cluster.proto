@@ -3,16 +3,33 @@ syntax = "proto3";
 package skipper.v1;
 
 import "skipper/v1/common.proto";
+import "skipper/v1/metrics.proto";
 
 option go_package = "github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1";
 
 // ClusterService 由控制平面实现，由 skctl / Web 等客户端调用。
 service ClusterService {
   rpc ListNodes(ListNodesRequest) returns (ListNodesResponse);
+  // ListMetrics 返回各节点最近一次的指标快照。
+  rpc ListMetrics(ListMetricsRequest) returns (ListMetricsResponse);
 }
 
 message ListNodesRequest {}
 
 message ListNodesResponse {
   repeated Node nodes = 1;
+}
+
+message NodeMetrics {
+  string node_id = 1;
+  string node_name = 2;
+  string partition = 3;
+  string state = 4;
+  MetricsSnapshot snapshot = 5;
+}
+
+message ListMetricsRequest {}
+
+message ListMetricsResponse {
+  repeated NodeMetrics nodes = 1;
 }

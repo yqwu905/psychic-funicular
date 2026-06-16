@@ -1,18 +1,14 @@
-// Package agent 实现节点代理：采集基础资源、向控制平面注册并周期心跳。
-// M0 仅采集 CPU 核数与内存总量；GPU/NPU 等真实采集器在 M1 引入。
+// Package agent 实现节点代理：采集资源、向控制平面注册并周期上报指标快照。
 package agent
 
 import (
-	"bufio"
 	"context"
 	"log/slog"
 	"os"
-	"runtime"
-	"strconv"
-	"strings"
 	"time"
 
 	skipperv1 "github.com/yqwu905/psychic-funicular/gen/skipper/v1"
+	"github.com/yqwu905/psychic-funicular/internal/collector"
 	"github.com/yqwu905/psychic-funicular/internal/config"
 	"github.com/yqwu905/psychic-funicular/internal/version"
 	"google.golang.org/grpc"
@@ -30,6 +26,9 @@ func Run(ctx context.Context, cfg config.AgentConfig, logger *slog.Logger) error
 		}
 	}
 
+	collectors := collector.Default(logger)
+	logger.Info("collectors initialized", "count", len(collectors))
+
 	conn, err := grpc.NewClient(cfg.Server.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return err
@@ -37,46 +36,48 @@ func Run(ctx context.Context, cfg config.AgentConfig, logger *slog.Logger) error
 	defer conn.Close()
 	client := skipperv1.NewAgentServiceClient(conn)
 
-	nodeID, err := register(ctx, client, cfg, name, logger)
+	nodeID, err := register(ctx, client, collectors, cfg, name, logger)
 	if err != nil {
 		return err
 	}
 
-	interval := cfg.Collectors.Interval.Std()
-	ticker := time.NewTicker(interval)
+	ticker := time.NewTicker(cfg.Collectors.Interval.Std())
 	defer ticker.Stop()
+	// 先立即上报一次，避免启动后到首个 tick 之间出现空窗，再按周期上报。
 	for {
+		snap := collector.CollectAll(ctx, collectors, logger)
+		resp, err := client.ReportMetrics(ctx, &skipperv1.ReportMetricsRequest{
+			NodeId:   nodeID,
+			Snapshot: snap,
+		})
+		switch {
+		case err != nil:
+			logger.Warn("report metrics failed", "err", err)
+		case resp.GetShouldReregister():
+			logger.Info("server requested re-register")
+			if id, err := register(ctx, client, collectors, cfg, name, logger); err != nil {
+				logger.Warn("re-register failed", "err", err)
+			} else {
+				nodeID = id
+			}
+		}
+
 		select {
 		case <-ctx.Done():
 			logger.Info("agent stopping")
 			return nil
 		case <-ticker.C:
-			resp, err := client.Heartbeat(ctx, &skipperv1.HeartbeatRequest{
-				NodeId:    nodeID,
-				Resources: collect(),
-			})
-			if err != nil {
-				logger.Warn("heartbeat failed", "err", err)
-				continue
-			}
-			if resp.GetShouldReregister() {
-				logger.Info("server requested re-register")
-				if id, err := register(ctx, client, cfg, name, logger); err != nil {
-					logger.Warn("re-register failed", "err", err)
-				} else {
-					nodeID = id
-				}
-			}
 		}
 	}
 }
 
-// register 带简单重试地向控制平面注册节点。
-func register(ctx context.Context, client skipperv1.AgentServiceClient, cfg config.AgentConfig, name string, logger *slog.Logger) (string, error) {
+// register 带指数退避地向控制平面注册节点；资源清单由一次采样推导。
+func register(ctx context.Context, client skipperv1.AgentServiceClient, collectors []collector.Collector, cfg config.AgentConfig, name string, logger *slog.Logger) (string, error) {
+	snap := collector.CollectAll(ctx, collectors, logger)
 	req := &skipperv1.RegisterNodeRequest{
 		Name:         name,
 		Partition:    cfg.Node.Partition,
-		Resources:    collect(),
+		Resources:    collector.ResourcesFromSnapshot(snap),
 		Labels:       cfg.Node.Labels,
 		AgentVersion: version.Version,
 	}
@@ -84,7 +85,8 @@ func register(ctx context.Context, client skipperv1.AgentServiceClient, cfg conf
 	for {
 		resp, err := client.RegisterNode(ctx, req)
 		if err == nil {
-			logger.Info("registered with server", "node_id", resp.GetNodeId(), "name", name, "server", cfg.Server.Addr)
+			logger.Info("registered with server", "node_id", resp.GetNodeId(), "name", name,
+				"server", cfg.Server.Addr, "cpus", req.GetResources().GetCpus(), "devices", len(req.GetResources().GetDevices()))
 			return resp.GetNodeId(), nil
 		}
 		logger.Warn("register failed, retrying", "err", err, "backoff", backoff)
@@ -97,38 +99,4 @@ func register(ctx context.Context, client skipperv1.AgentServiceClient, cfg conf
 			backoff *= 2
 		}
 	}
-}
-
-// collect 采集当前节点的基础资源。
-func collect() *skipperv1.Resources {
-	return &skipperv1.Resources{
-		Cpus:          uint32(runtime.NumCPU()),
-		MemTotalBytes: memTotalBytes(),
-	}
-}
-
-// memTotalBytes 从 /proc/meminfo 读取 MemTotal（字节）；非 Linux 或失败时返回 0。
-func memTotalBytes() uint64 {
-	f, err := os.Open("/proc/meminfo")
-	if err != nil {
-		return 0
-	}
-	defer f.Close()
-	sc := bufio.NewScanner(f)
-	for sc.Scan() {
-		line := sc.Text()
-		if !strings.HasPrefix(line, "MemTotal:") {
-			continue
-		}
-		fields := strings.Fields(line) // MemTotal:  16384256 kB
-		if len(fields) < 2 {
-			return 0
-		}
-		kb, err := strconv.ParseUint(fields[1], 10, 64)
-		if err != nil {
-			return 0
-		}
-		return kb * 1024
-	}
-	return 0
 }

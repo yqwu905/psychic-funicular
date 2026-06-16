@@ -61,7 +61,7 @@ flowchart LR
 
 ## 仓库结构
 
-`✅` 已实现（M0）；其余为后续里程碑规划。
+`✅` 已实现（M0–M1）；其余为后续里程碑规划。
 
 ```
 .
@@ -76,8 +76,9 @@ flowchart LR
 │   ├── server/              # ✅ gRPC 服务、节点注册、失联巡检
 │   ├── agent/               # ✅ 资源采集、注册、心跳
 │   ├── store/               # ✅ 持久化接口 + SQLite 实现
+│   ├── collector/           # ✅ CPU/内存/磁盘 + GPU(nvidia)/NPU(ascend) 采集
+│   ├── metrics/             # ✅ 近线指标存储（最新快照）
 │   ├── scheduler/           #    调度策略与作业生命周期（M2）
-│   ├── collector/           #    GPU/NPU 等采集器（M1）
 │   ├── transport/           #    SSH 隧道 / 反向隧道（M3）
 │   └── notify/              #    事件引擎 + 通知器接口（M4）
 ├── api/proto/               # ✅ .proto 接口契约
@@ -125,10 +126,14 @@ make build            # 或 go build -o bin/ ./cmd/...
 # 3) 另开终端，启动一个节点代理（直连注册 + 周期心跳）
 ./bin/skipper-agent --server 127.0.0.1:7443 --name node-1 --partition gpu
 
-# 4) 再开终端，查看集群节点
-./bin/skctl nodes
-# NAME    STATE  PARTITION  CPUS  MEM      DEVICES  HEARTBEAT  VERSION
-# node-1  UP     gpu        8     31.3GiB  0        2s ago     0.0.1-m0
+# 4) 再开终端：节点库存 / 实时负载 / 设备
+./bin/skctl nodes      # NAME STATE PARTITION CPUS MEM GPU NPU HEARTBEAT VERSION
+./bin/skctl top        # 实时 CPU%/内存/负载
+./bin/skctl gpu        # 各节点 GPU 实时指标（需 nvidia-smi）
+./bin/skctl npu        # 各节点 NPU 实时指标（需 npu-smi）
+
+# 5) Prometheus 指标端点
+curl -s localhost:9100/metrics | grep '^skipper_'
 ```
 
 修改 `.proto` 后用 `make tools`（首次）+ `make proto` 重新生成 gRPC 代码。
@@ -136,8 +141,10 @@ make build            # 或 go build -o bin/ ./cmd/...
 
 ## 当前状态
 
-✅ **M0 已完成**：gRPC 骨架、配置/日志、SQLite 存储、Agent 注册与心跳、失联巡检、
-`skctl nodes`、单元测试与 CI、容器化部署。端到端链路（server→agent 注册→`skctl nodes`）已跑通。
+✅ **M0 骨架 + M1 监控 MVP 已完成**：
+- **M0**：gRPC 骨架、配置/日志、SQLite 存储、注册/心跳、失联巡检、CI、容器化。
+- **M1**：CPU/内存/磁盘 + GPU(nvidia-smi)/NPU(npu-smi) 采集器、注册即上报 + 周期采样、
+  近线指标存储、Prometheus `/metrics`、`skctl top/gpu/npu`。实时监控端到端已跑通。
 
-🚧 下一步 **M1 监控 MVP**：CPU/内存/磁盘 + NVIDIA(NVML) + 昇腾(npu-smi) 采集器。
-里程碑详见 [docs/ROADMAP.md](docs/ROADMAP.md)。
+🚧 下一步 **M2 调度 MVP**：作业模型与状态机、FIFO+优先级调度、单节点执行（cgroup +
+设备隔离）、`skctl submit/queue/cancel/logs`。里程碑详见 [docs/ROADMAP.md](docs/ROADMAP.md)。

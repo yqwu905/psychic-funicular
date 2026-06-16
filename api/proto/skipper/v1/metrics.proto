@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package skipper.v1;
+
+option go_package = "github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1";
+
+// 一次采样的 CPU 指标。
+message CPUStats {
+  double utilization = 1; // 0-100，整体使用率
+  double load1 = 2;
+  double load5 = 3;
+  double load15 = 4;
+  uint32 cores = 5;
+}
+
+// 一次采样的内存指标。
+message MemStats {
+  uint64 total_bytes = 1;
+  uint64 used_bytes = 2;
+  uint64 available_bytes = 3;
+  double used_percent = 4;
+}
+
+// 一个挂载点的磁盘指标。
+message DiskStats {
+  string mount = 1;
+  string fstype = 2;
+  uint64 total_bytes = 3;
+  uint64 used_bytes = 4;
+  double used_percent = 5;
+  double inodes_used_percent = 6;
+}
+
+// 一块加速设备（GPU/NPU）的实时指标。
+message DeviceStats {
+  string kind = 1;   // "gpu" | "npu"
+  string vendor = 2; // "nvidia" | "ascend"
+  uint32 index = 3;
+  string uuid = 4;
+  string name = 5;
+  double utilization = 6; // 0-100
+  uint64 mem_total_bytes = 7;
+  uint64 mem_used_bytes = 8;
+  double temperature_c = 9;
+  double power_watts = 10;
+}
+
+// 一个节点在某时刻的完整指标快照。
+message MetricsSnapshot {
+  int64 timestamp_unix = 1;
+  CPUStats cpu = 2;
+  MemStats mem = 3;
+  repeated DiskStats disks = 4;
+  repeated DeviceStats devices = 5;
+}

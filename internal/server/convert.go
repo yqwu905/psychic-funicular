@@ -24,6 +24,28 @@ func resourcesFromProto(n *store.Node, r *skipperv1.Resources) {
 	}
 }
 
+// nodeFromSnapshot 从指标快照提取静态库存(核数/内存/设备清单)到 store.Node。
+func nodeFromSnapshot(n *store.Node, snap *skipperv1.MetricsSnapshot) {
+	if snap == nil {
+		return
+	}
+	if snap.GetCpu() != nil {
+		n.CPUs = snap.GetCpu().GetCores()
+	}
+	if snap.GetMem() != nil {
+		n.MemTotalBytes = snap.GetMem().GetTotalBytes()
+	}
+	for _, d := range snap.GetDevices() {
+		n.Devices = append(n.Devices, store.Device{
+			Kind:          d.GetKind(),
+			Vendor:        d.GetVendor(),
+			Index:         d.GetIndex(),
+			UUID:          d.GetUuid(),
+			MemTotalBytes: d.GetMemTotalBytes(),
+		})
+	}
+}
+
 // nodeToProto 把 store.Node 转为对外的 proto Node。
 func nodeToProto(n *store.Node) *skipperv1.Node {
 	devices := make([]*skipperv1.Device, 0, len(n.Devices))

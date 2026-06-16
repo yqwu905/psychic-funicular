@@ -4,6 +4,8 @@ listen:
 store:
   driver: sqlite
   dsn: "skipper.db"
+metrics:
+  http: ":9100"         # Prometheus 端点(/metrics)；留空则不启用
 heartbeat:
   timeout: "30s"        # 超过该时长未心跳则判定节点 DOWN
   reap_interval: "10s"  # 失联巡检周期
