@@ -26,7 +26,7 @@ erDiagram
 -- 用户与归属
 user(id, name, role, password_hash, created_at)
 account(id, name, parent_id, fairshare_weight)          -- 后期：公平份额
-contact(id, user_id, channel, address)                  -- email/feishu/... 地址
+contact(id, user_id, channel, address)                  -- channel=通道名(使用方自定), address=该通道地址
 preference(user_id, preferred_channels, quiet_hours)
 
 -- 拓扑与资源
@@ -78,7 +78,7 @@ Agent↔Server 内部接口（不对外）：`RegisterAgent`、`ReportMetrics(st
 | `skctl cancel <jobid>` | `scancel` | 取消作业 |
 | `skctl logs -f <jobid>` | — | 跟踪作业日志 |
 | `skctl node drain/resume <node>` | `scontrol update` | 节点维护 |
-| `skctl notify test --channel feishu` | — | 通道连通性自检 |
+| `skctl notify test --channel <name>` | — | 通道连通性自检 |
 | `skctl gpu` / `skctl npu` | — | 设备利用率/占用一览 |
 
 提交示例：

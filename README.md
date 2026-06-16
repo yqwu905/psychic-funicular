@@ -14,7 +14,7 @@ GPU/NPU 长时间空置、任务结束等事件发生时，通过可插拔的通
 | 资源监控 | CPU / 内存 / 磁盘 / 网络 + GPU(NVIDIA) / NPU(昇腾等) 统一采集 |
 | 任务调度 | 类 Slurm 的队列(Partition)、优先级、资源请求、作业生命周期、Backfill |
 | 异构接入 | 直连 gRPC / **SSH 隧道**（适配「仅开放 SSH 端口」的 Docker） |
-| 事件通知 | 事件引擎 + 规则路由 + 可插拔通知器（邮件 / 飞书 / 钉钉 / 企业微信 / Webhook…） |
+| 事件通知 | 事件引擎 + 规则路由 + 可插拔通知器**接口**（具体渠道由使用方实现，框架不内置） |
 | 部署 | 单二进制、容器化、SQLite(小规模) 或 PostgreSQL(生产) |
 
 ## 系统组成
@@ -40,7 +40,7 @@ flowchart LR
         AG2[Agent in Docker\n仅 SSH 端口]
     end
 
-    NOTIFY[[通知器: 邮件/飞书/钉钉/...]]
+    NOTIFY[[通知器接口\n使用方实现]]
 
     CLI --> API
     WEB --> API
