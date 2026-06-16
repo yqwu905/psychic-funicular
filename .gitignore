@@ -1,0 +1,17 @@
+# 构建产物
+/bin/
+*.exe
+
+# 运行时数据
+*.db
+*.db-shm
+*.db-wal
+skipper.db
+
+# 本地配置覆盖
+*.local.yaml
+
+# 编辑器
+.idea/
+.vscode/
+*.swp

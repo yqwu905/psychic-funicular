@@ -59,27 +59,32 @@ flowchart LR
 - **客户端**：`skctl` 命令行（对标 `sbatch/squeue/sinfo/scancel`），可选 Web 控制台。
 - **通知器（Notifier）**：可插拔的通知通道，由事件引擎按规则触发。
 
-## 仓库结构（规划）
+## 仓库结构
+
+`✅` 已实现（M0）；其余为后续里程碑规划。
 
 ```
 .
 ├── cmd/
-│   ├── skipper-server/      # 控制平面入口
-│   ├── skipper-agent/       # 节点代理入口
-│   └── skctl/               # 命令行客户端
+│   ├── skipper-server/      # ✅ 控制平面入口
+│   ├── skipper-agent/       # ✅ 节点代理入口
+│   └── skctl/               # ✅ 命令行客户端
 ├── internal/
-│   ├── server/              # API、节点注册、作业管理
-│   ├── scheduler/           # 调度策略与作业生命周期
-│   ├── agent/               # 采集、执行、上报
-│   ├── collector/           # 资源采集器（cpu/mem/disk/gpu/npu）
-│   ├── transport/           # 通信抽象（grpc / ssh 隧道 / 反向隧道）
-│   ├── notify/              # 事件引擎 + 通知器插件
-│   ├── store/               # 持久化与数据模型
-│   └── proto/               # gRPC/protobuf 定义（生成代码）
-├── api/                     # .proto 源文件、OpenAPI
-├── deploy/                  # docker-compose、镜像、systemd、示例配置
-├── docs/                    # 设计文档（见下）
-└── web/                     # Web 控制台（可选，后期）
+│   ├── config/              # ✅ 配置加载（YAML + 环境变量）
+│   ├── log/                 # ✅ 结构化日志
+│   ├── version/             # ✅ 版本信息
+│   ├── server/              # ✅ gRPC 服务、节点注册、失联巡检
+│   ├── agent/               # ✅ 资源采集、注册、心跳
+│   ├── store/               # ✅ 持久化接口 + SQLite 实现
+│   ├── scheduler/           #    调度策略与作业生命周期（M2）
+│   ├── collector/           #    GPU/NPU 等采集器（M1）
+│   ├── transport/           #    SSH 隧道 / 反向隧道（M3）
+│   └── notify/              #    事件引擎 + 通知器接口（M4）
+├── api/proto/               # ✅ .proto 接口契约
+├── gen/                     # ✅ 生成的 gRPC 代码（已提交）
+├── deploy/                  # ✅ 示例配置、Dockerfile、docker-compose
+├── docs/                    # ✅ 设计文档（见下）
+└── web/                     #    Web 控制台（可选，后期）
 ```
 
 ## 设计文档
@@ -106,8 +111,33 @@ flowchart LR
 
 > 决策记录见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## 快速上手
+
+需要 Go 1.25+。
+
+```bash
+# 1) 编译三个二进制到 bin/
+make build            # 或 go build -o bin/ ./cmd/...
+
+# 2) 启动控制平面（默认监听 :7443，SQLite 落到 skipper.db）
+./bin/skipper-server --config deploy/server.yaml
+
+# 3) 另开终端，启动一个节点代理（直连注册 + 周期心跳）
+./bin/skipper-agent --server 127.0.0.1:7443 --name node-1 --partition gpu
+
+# 4) 再开终端，查看集群节点
+./bin/skctl nodes
+# NAME    STATE  PARTITION  CPUS  MEM      DEVICES  HEARTBEAT  VERSION
+# node-1  UP     gpu        8     31.3GiB  0        2s ago     0.0.1-m0
+```
+
+修改 `.proto` 后用 `make tools`（首次）+ `make proto` 重新生成 gRPC 代码。
+容器化：`docker compose -f deploy/docker-compose.yml up --build`。
+
 ## 当前状态
 
-🚧 设计阶段，核心选型已确认（Go / SQLite 单机 / NVIDIA+昇腾 / CLI 优先）。
-本仓库目前只包含设计文档。下一步进入 **M0 骨架**搭建，详见
-[docs/ROADMAP.md](docs/ROADMAP.md)。
+✅ **M0 已完成**：gRPC 骨架、配置/日志、SQLite 存储、Agent 注册与心跳、失联巡检、
+`skctl nodes`、单元测试与 CI、容器化部署。端到端链路（server→agent 注册→`skctl nodes`）已跑通。
+
+🚧 下一步 **M1 监控 MVP**：CPU/内存/磁盘 + NVIDIA(NVML) + 昇腾(npu-smi) 采集器。
+里程碑详见 [docs/ROADMAP.md](docs/ROADMAP.md)。

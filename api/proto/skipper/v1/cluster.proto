@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package skipper.v1;
+
+import "skipper/v1/common.proto";
+
+option go_package = "github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1";
+
+// ClusterService 由控制平面实现，由 skctl / Web 等客户端调用。
+service ClusterService {
+  rpc ListNodes(ListNodesRequest) returns (ListNodesResponse);
+}
+
+message ListNodesRequest {}
+
+message ListNodesResponse {
+  repeated Node nodes = 1;
+}

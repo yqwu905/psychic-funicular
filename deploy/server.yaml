@@ -1,0 +1,11 @@
+# 控制平面示例配置
+listen:
+  grpc: ":7443"
+store:
+  driver: sqlite
+  dsn: "skipper.db"
+heartbeat:
+  timeout: "30s"        # 超过该时长未心跳则判定节点 DOWN
+  reap_interval: "10s"  # 失联巡检周期
+log:
+  level: "info"         # debug | info | warn | error

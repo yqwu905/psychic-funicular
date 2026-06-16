@@ -4,12 +4,13 @@
 
 ## 里程碑
 
-### M0 — 骨架与基础设施
-- 仓库结构、`go.mod`、配置加载、日志、CI。
-- protobuf 接口定义与代码生成；gRPC server/agent 脚手架。
-- 存储接口 + SQLite 实现；基础数据表迁移。
-- `skctl` 骨架（能连 server、跑通 `nodes` 空列表）。
-- **可演示**：server 起、agent 直连注册、`skctl nodes` 看到一个节点。
+### M0 — 骨架与基础设施 ✅（已完成）
+- ✅ 仓库结构、`go.mod`、配置加载（YAML+env）、结构化日志、CI。
+- ✅ protobuf 接口定义与 buf 代码生成；gRPC server/agent/skctl 脚手架。
+- ✅ 存储接口 + SQLite（modernc 纯 Go）实现；建表迁移；单元测试。
+- ✅ Agent 直连注册 + 周期心跳（带退避重试）；Server 失联巡检置 DOWN。
+- ✅ `skctl nodes` 展示节点；Dockerfile + docker-compose。
+- ✅ **已演示**：server 起 → agent 注册 → `skctl nodes` 看到节点（端到端跑通）。
 
 ### M1 — 监控 MVP
 - 采集器接口 + CPU/内存/磁盘 + NVIDIA GPU（NVML，降级 nvidia-smi）。

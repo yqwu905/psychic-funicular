@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+      # gen/ 下的 gRPC 代码已提交，CI 无需 buf 即可构建。
+      - run: go build ./...
+      - run: go vet ./...
+      - run: go test ./...

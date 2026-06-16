@@ -1,0 +1,32 @@
+# 本地一键起：控制平面 + 一个节点代理（直连 gRPC）。
+# 在仓库根目录执行： docker compose -f deploy/docker-compose.yml up --build
+services:
+  server:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      target: server
+    ports:
+      - "7443:7443"
+    environment:
+      SKIPPER_LISTEN_GRPC: ":7443"
+      SKIPPER_STORE_DSN: "/data/skipper.db"
+      SKIPPER_LOG_LEVEL: "info"
+    volumes:
+      - skipper-data:/data
+
+  agent:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      target: agent
+    environment:
+      SKIPPER_SERVER_ADDR: "server:7443"
+      SKIPPER_NODE_NAME: "compose-agent-1"
+      SKIPPER_NODE_PARTITION: "default"
+      SKIPPER_LOG_LEVEL: "info"
+    depends_on:
+      - server
+
+volumes:
+  skipper-data:
