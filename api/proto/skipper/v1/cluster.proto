@@ -4,6 +4,7 @@ package skipper.v1;
 
 import "skipper/v1/common.proto";
 import "skipper/v1/metrics.proto";
+import "skipper/v1/job.proto";
 
 option go_package = "github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1";
 
@@ -12,6 +13,13 @@ service ClusterService {
   rpc ListNodes(ListNodesRequest) returns (ListNodesResponse);
   // ListMetrics 返回各节点最近一次的指标快照。
   rpc ListMetrics(ListMetricsRequest) returns (ListMetricsResponse);
+
+  // 作业管理。
+  rpc SubmitJob(SubmitJobRequest) returns (SubmitJobResponse);
+  rpc ListJobs(ListJobsRequest) returns (ListJobsResponse);
+  rpc GetJob(GetJobRequest) returns (Job);
+  rpc CancelJob(CancelJobRequest) returns (CancelJobResponse);
+  rpc GetJobLogs(GetJobLogsRequest) returns (stream LogChunk);
 }
 
 message ListNodesRequest {}
@@ -32,4 +40,46 @@ message ListMetricsRequest {}
 
 message ListMetricsResponse {
   repeated NodeMetrics nodes = 1;
+}
+
+message SubmitJobRequest {
+  string name = 1;
+  string owner = 2;
+  string partition = 3;
+  int32 priority = 4;
+  string command = 5;
+  map<string, string> env = 6;
+  string workdir = 7;
+  ResourceRequest request = 8;
+}
+
+message SubmitJobResponse {
+  string job_id = 1;
+}
+
+message ListJobsRequest {
+  string state = 1; // 可选状态过滤
+  string owner = 2; // 可选属主过滤
+}
+
+message ListJobsResponse {
+  repeated Job jobs = 1;
+}
+
+message GetJobRequest {
+  string job_id = 1;
+}
+
+message CancelJobRequest {
+  string job_id = 1;
+}
+
+message CancelJobResponse {
+  bool ok = 1;
+  string state = 2;
+}
+
+message GetJobLogsRequest {
+  string job_id = 1;
+  bool follow = 2;
 }

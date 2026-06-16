@@ -103,6 +103,9 @@ stateDiagram-v2
 | NPU(昇腾) | `ASCEND_RT_VISIBLE_DEVICES=<索引>` |
 | 强隔离(可选) | 以 `docker run --gpus '"device=..."'` 或挂载 NPU 设备的嵌套容器执行 |
 
+> 实现进度：M2 已落地**设备可见性隔离**（env）、walltime 与日志/退出码；
+> **cgroup v2 的 CPU/内存硬限额**作为 M5 硬化项（需 cgroup2 委派与权限，按环境启用）。
+
 执行器职责：
 1. 准备工作目录、环境变量、设备可见性；
 2. 写入并执行作业脚本（前台进程组，便于整组信号控制）；

@@ -4,6 +4,7 @@ package skipper.v1;
 
 import "skipper/v1/common.proto";
 import "skipper/v1/metrics.proto";
+import "skipper/v1/job.proto";
 
 option go_package = "github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1";
 
@@ -13,6 +14,12 @@ service AgentService {
   rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
   // ReportMetrics 周期上报一次完整指标快照，同时充当存活信号。
   rpc ReportMetrics(ReportMetricsRequest) returns (ReportMetricsResponse);
+  // PollAssignments 拉取本节点待执行/待取消的作业（轮询式下发，兼容 SSH 反向场景）。
+  rpc PollAssignments(PollAssignmentsRequest) returns (PollAssignmentsResponse);
+  // UpdateJobStatus 上报作业状态变更（RUNNING / 终态及退出码）。
+  rpc UpdateJobStatus(UpdateJobStatusRequest) returns (UpdateJobStatusResponse);
+  // AppendLogs 追加一段作业日志。
+  rpc AppendLogs(AppendLogsRequest) returns (AppendLogsResponse);
 }
 
 message RegisterNodeRequest {
@@ -44,6 +51,35 @@ message ReportMetricsRequest {
 
 message ReportMetricsResponse {
   bool ok = 1;
-  // 节点未知时置真（如 server 重启丢状态），提示 Agent 重新注册。
   bool should_reregister = 2;
+}
+
+message PollAssignmentsRequest {
+  string node_id = 1;
+}
+
+message PollAssignmentsResponse {
+  repeated Assignment run = 1;        // 需要启动的作业
+  repeated string cancel_job_ids = 2; // 需要终止的作业
+  bool should_reregister = 3;
+}
+
+message UpdateJobStatusRequest {
+  string job_id = 1;
+  string state = 2;
+  int32 exit_code = 3;
+  string reason = 4;
+}
+
+message UpdateJobStatusResponse {
+  bool ok = 1;
+}
+
+message AppendLogsRequest {
+  string job_id = 1;
+  bytes data = 2;
+}
+
+message AppendLogsResponse {
+  bool ok = 1;
 }

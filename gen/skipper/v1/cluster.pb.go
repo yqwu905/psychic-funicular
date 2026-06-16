@@ -257,12 +257,444 @@ func (x *ListMetricsResponse) GetNodes() []*NodeMetrics {
 	return nil
 }
 
+type SubmitJobRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Owner         string                 `protobuf:"bytes,2,opt,name=owner,proto3" json:"owner,omitempty"`
+	Partition     string                 `protobuf:"bytes,3,opt,name=partition,proto3" json:"partition,omitempty"`
+	Priority      int32                  `protobuf:"varint,4,opt,name=priority,proto3" json:"priority,omitempty"`
+	Command       string                 `protobuf:"bytes,5,opt,name=command,proto3" json:"command,omitempty"`
+	Env           map[string]string      `protobuf:"bytes,6,rep,name=env,proto3" json:"env,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Workdir       string                 `protobuf:"bytes,7,opt,name=workdir,proto3" json:"workdir,omitempty"`
+	Request       *ResourceRequest       `protobuf:"bytes,8,opt,name=request,proto3" json:"request,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SubmitJobRequest) Reset() {
+	*x = SubmitJobRequest{}
+	mi := &file_skipper_v1_cluster_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubmitJobRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubmitJobRequest) ProtoMessage() {}
+
+func (x *SubmitJobRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_cluster_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubmitJobRequest.ProtoReflect.Descriptor instead.
+func (*SubmitJobRequest) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_cluster_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *SubmitJobRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *SubmitJobRequest) GetOwner() string {
+	if x != nil {
+		return x.Owner
+	}
+	return ""
+}
+
+func (x *SubmitJobRequest) GetPartition() string {
+	if x != nil {
+		return x.Partition
+	}
+	return ""
+}
+
+func (x *SubmitJobRequest) GetPriority() int32 {
+	if x != nil {
+		return x.Priority
+	}
+	return 0
+}
+
+func (x *SubmitJobRequest) GetCommand() string {
+	if x != nil {
+		return x.Command
+	}
+	return ""
+}
+
+func (x *SubmitJobRequest) GetEnv() map[string]string {
+	if x != nil {
+		return x.Env
+	}
+	return nil
+}
+
+func (x *SubmitJobRequest) GetWorkdir() string {
+	if x != nil {
+		return x.Workdir
+	}
+	return ""
+}
+
+func (x *SubmitJobRequest) GetRequest() *ResourceRequest {
+	if x != nil {
+		return x.Request
+	}
+	return nil
+}
+
+type SubmitJobResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SubmitJobResponse) Reset() {
+	*x = SubmitJobResponse{}
+	mi := &file_skipper_v1_cluster_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubmitJobResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubmitJobResponse) ProtoMessage() {}
+
+func (x *SubmitJobResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_cluster_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubmitJobResponse.ProtoReflect.Descriptor instead.
+func (*SubmitJobResponse) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_cluster_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *SubmitJobResponse) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+type ListJobsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	State         string                 `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"` // 可选状态过滤
+	Owner         string                 `protobuf:"bytes,2,opt,name=owner,proto3" json:"owner,omitempty"` // 可选属主过滤
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListJobsRequest) Reset() {
+	*x = ListJobsRequest{}
+	mi := &file_skipper_v1_cluster_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListJobsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListJobsRequest) ProtoMessage() {}
+
+func (x *ListJobsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_cluster_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListJobsRequest.ProtoReflect.Descriptor instead.
+func (*ListJobsRequest) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_cluster_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ListJobsRequest) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *ListJobsRequest) GetOwner() string {
+	if x != nil {
+		return x.Owner
+	}
+	return ""
+}
+
+type ListJobsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Jobs          []*Job                 `protobuf:"bytes,1,rep,name=jobs,proto3" json:"jobs,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListJobsResponse) Reset() {
+	*x = ListJobsResponse{}
+	mi := &file_skipper_v1_cluster_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListJobsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListJobsResponse) ProtoMessage() {}
+
+func (x *ListJobsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_cluster_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListJobsResponse.ProtoReflect.Descriptor instead.
+func (*ListJobsResponse) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_cluster_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ListJobsResponse) GetJobs() []*Job {
+	if x != nil {
+		return x.Jobs
+	}
+	return nil
+}
+
+type GetJobRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetJobRequest) Reset() {
+	*x = GetJobRequest{}
+	mi := &file_skipper_v1_cluster_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetJobRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetJobRequest) ProtoMessage() {}
+
+func (x *GetJobRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_cluster_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetJobRequest.ProtoReflect.Descriptor instead.
+func (*GetJobRequest) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_cluster_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetJobRequest) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+type CancelJobRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CancelJobRequest) Reset() {
+	*x = CancelJobRequest{}
+	mi := &file_skipper_v1_cluster_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelJobRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelJobRequest) ProtoMessage() {}
+
+func (x *CancelJobRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_cluster_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CancelJobRequest.ProtoReflect.Descriptor instead.
+func (*CancelJobRequest) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_cluster_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *CancelJobRequest) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+type CancelJobResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ok            bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+	State         string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CancelJobResponse) Reset() {
+	*x = CancelJobResponse{}
+	mi := &file_skipper_v1_cluster_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelJobResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelJobResponse) ProtoMessage() {}
+
+func (x *CancelJobResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_cluster_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CancelJobResponse.ProtoReflect.Descriptor instead.
+func (*CancelJobResponse) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_cluster_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *CancelJobResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
+func (x *CancelJobResponse) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+type GetJobLogsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	Follow        bool                   `protobuf:"varint,2,opt,name=follow,proto3" json:"follow,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetJobLogsRequest) Reset() {
+	*x = GetJobLogsRequest{}
+	mi := &file_skipper_v1_cluster_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetJobLogsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetJobLogsRequest) ProtoMessage() {}
+
+func (x *GetJobLogsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_cluster_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetJobLogsRequest.ProtoReflect.Descriptor instead.
+func (*GetJobLogsRequest) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_cluster_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *GetJobLogsRequest) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+func (x *GetJobLogsRequest) GetFollow() bool {
+	if x != nil {
+		return x.Follow
+	}
+	return false
+}
+
 var File_skipper_v1_cluster_proto protoreflect.FileDescriptor
 
 const file_skipper_v1_cluster_proto_rawDesc = "" +
 	"\n" +
 	"\x18skipper/v1/cluster.proto\x12\n" +
-	"skipper.v1\x1a\x17skipper/v1/common.proto\x1a\x18skipper/v1/metrics.proto\"\x12\n" +
+	"skipper.v1\x1a\x17skipper/v1/common.proto\x1a\x18skipper/v1/metrics.proto\x1a\x14skipper/v1/job.proto\"\x12\n" +
 	"\x10ListNodesRequest\";\n" +
 	"\x11ListNodesResponse\x12&\n" +
 	"\x05nodes\x18\x01 \x03(\v2\x10.skipper.v1.NodeR\x05nodes\"\xb0\x01\n" +
@@ -274,10 +706,45 @@ const file_skipper_v1_cluster_proto_rawDesc = "" +
 	"\bsnapshot\x18\x05 \x01(\v2\x1b.skipper.v1.MetricsSnapshotR\bsnapshot\"\x14\n" +
 	"\x12ListMetricsRequest\"D\n" +
 	"\x13ListMetricsResponse\x12-\n" +
-	"\x05nodes\x18\x01 \x03(\v2\x17.skipper.v1.NodeMetricsR\x05nodes2\xaa\x01\n" +
+	"\x05nodes\x18\x01 \x03(\v2\x17.skipper.v1.NodeMetricsR\x05nodes\"\xd2\x02\n" +
+	"\x10SubmitJobRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
+	"\x05owner\x18\x02 \x01(\tR\x05owner\x12\x1c\n" +
+	"\tpartition\x18\x03 \x01(\tR\tpartition\x12\x1a\n" +
+	"\bpriority\x18\x04 \x01(\x05R\bpriority\x12\x18\n" +
+	"\acommand\x18\x05 \x01(\tR\acommand\x127\n" +
+	"\x03env\x18\x06 \x03(\v2%.skipper.v1.SubmitJobRequest.EnvEntryR\x03env\x12\x18\n" +
+	"\aworkdir\x18\a \x01(\tR\aworkdir\x125\n" +
+	"\arequest\x18\b \x01(\v2\x1b.skipper.v1.ResourceRequestR\arequest\x1a6\n" +
+	"\bEnvEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"*\n" +
+	"\x11SubmitJobResponse\x12\x15\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\"=\n" +
+	"\x0fListJobsRequest\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x14\n" +
+	"\x05owner\x18\x02 \x01(\tR\x05owner\"7\n" +
+	"\x10ListJobsResponse\x12#\n" +
+	"\x04jobs\x18\x01 \x03(\v2\x0f.skipper.v1.JobR\x04jobs\"&\n" +
+	"\rGetJobRequest\x12\x15\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\")\n" +
+	"\x10CancelJobRequest\x12\x15\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\"9\n" +
+	"\x11CancelJobResponse\x12\x0e\n" +
+	"\x02ok\x18\x01 \x01(\bR\x02ok\x12\x14\n" +
+	"\x05state\x18\x02 \x01(\tR\x05state\"B\n" +
+	"\x11GetJobLogsRequest\x12\x15\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x16\n" +
+	"\x06follow\x18\x02 \x01(\bR\x06follow2\x80\x04\n" +
 	"\x0eClusterService\x12H\n" +
 	"\tListNodes\x12\x1c.skipper.v1.ListNodesRequest\x1a\x1d.skipper.v1.ListNodesResponse\x12N\n" +
-	"\vListMetrics\x12\x1e.skipper.v1.ListMetricsRequest\x1a\x1f.skipper.v1.ListMetricsResponseB?Z=github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1b\x06proto3"
+	"\vListMetrics\x12\x1e.skipper.v1.ListMetricsRequest\x1a\x1f.skipper.v1.ListMetricsResponse\x12H\n" +
+	"\tSubmitJob\x12\x1c.skipper.v1.SubmitJobRequest\x1a\x1d.skipper.v1.SubmitJobResponse\x12E\n" +
+	"\bListJobs\x12\x1b.skipper.v1.ListJobsRequest\x1a\x1c.skipper.v1.ListJobsResponse\x124\n" +
+	"\x06GetJob\x12\x19.skipper.v1.GetJobRequest\x1a\x0f.skipper.v1.Job\x12H\n" +
+	"\tCancelJob\x12\x1c.skipper.v1.CancelJobRequest\x1a\x1d.skipper.v1.CancelJobResponse\x12C\n" +
+	"\n" +
+	"GetJobLogs\x12\x1d.skipper.v1.GetJobLogsRequest\x1a\x14.skipper.v1.LogChunk0\x01B?Z=github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1b\x06proto3"
 
 var (
 	file_skipper_v1_cluster_proto_rawDescOnce sync.Once
@@ -291,29 +758,54 @@ func file_skipper_v1_cluster_proto_rawDescGZIP() []byte {
 	return file_skipper_v1_cluster_proto_rawDescData
 }
 
-var file_skipper_v1_cluster_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_skipper_v1_cluster_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_skipper_v1_cluster_proto_goTypes = []any{
 	(*ListNodesRequest)(nil),    // 0: skipper.v1.ListNodesRequest
 	(*ListNodesResponse)(nil),   // 1: skipper.v1.ListNodesResponse
 	(*NodeMetrics)(nil),         // 2: skipper.v1.NodeMetrics
 	(*ListMetricsRequest)(nil),  // 3: skipper.v1.ListMetricsRequest
 	(*ListMetricsResponse)(nil), // 4: skipper.v1.ListMetricsResponse
-	(*Node)(nil),                // 5: skipper.v1.Node
-	(*MetricsSnapshot)(nil),     // 6: skipper.v1.MetricsSnapshot
+	(*SubmitJobRequest)(nil),    // 5: skipper.v1.SubmitJobRequest
+	(*SubmitJobResponse)(nil),   // 6: skipper.v1.SubmitJobResponse
+	(*ListJobsRequest)(nil),     // 7: skipper.v1.ListJobsRequest
+	(*ListJobsResponse)(nil),    // 8: skipper.v1.ListJobsResponse
+	(*GetJobRequest)(nil),       // 9: skipper.v1.GetJobRequest
+	(*CancelJobRequest)(nil),    // 10: skipper.v1.CancelJobRequest
+	(*CancelJobResponse)(nil),   // 11: skipper.v1.CancelJobResponse
+	(*GetJobLogsRequest)(nil),   // 12: skipper.v1.GetJobLogsRequest
+	nil,                         // 13: skipper.v1.SubmitJobRequest.EnvEntry
+	(*Node)(nil),                // 14: skipper.v1.Node
+	(*MetricsSnapshot)(nil),     // 15: skipper.v1.MetricsSnapshot
+	(*ResourceRequest)(nil),     // 16: skipper.v1.ResourceRequest
+	(*Job)(nil),                 // 17: skipper.v1.Job
+	(*LogChunk)(nil),            // 18: skipper.v1.LogChunk
 }
 var file_skipper_v1_cluster_proto_depIdxs = []int32{
-	5, // 0: skipper.v1.ListNodesResponse.nodes:type_name -> skipper.v1.Node
-	6, // 1: skipper.v1.NodeMetrics.snapshot:type_name -> skipper.v1.MetricsSnapshot
-	2, // 2: skipper.v1.ListMetricsResponse.nodes:type_name -> skipper.v1.NodeMetrics
-	0, // 3: skipper.v1.ClusterService.ListNodes:input_type -> skipper.v1.ListNodesRequest
-	3, // 4: skipper.v1.ClusterService.ListMetrics:input_type -> skipper.v1.ListMetricsRequest
-	1, // 5: skipper.v1.ClusterService.ListNodes:output_type -> skipper.v1.ListNodesResponse
-	4, // 6: skipper.v1.ClusterService.ListMetrics:output_type -> skipper.v1.ListMetricsResponse
-	5, // [5:7] is the sub-list for method output_type
-	3, // [3:5] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	14, // 0: skipper.v1.ListNodesResponse.nodes:type_name -> skipper.v1.Node
+	15, // 1: skipper.v1.NodeMetrics.snapshot:type_name -> skipper.v1.MetricsSnapshot
+	2,  // 2: skipper.v1.ListMetricsResponse.nodes:type_name -> skipper.v1.NodeMetrics
+	13, // 3: skipper.v1.SubmitJobRequest.env:type_name -> skipper.v1.SubmitJobRequest.EnvEntry
+	16, // 4: skipper.v1.SubmitJobRequest.request:type_name -> skipper.v1.ResourceRequest
+	17, // 5: skipper.v1.ListJobsResponse.jobs:type_name -> skipper.v1.Job
+	0,  // 6: skipper.v1.ClusterService.ListNodes:input_type -> skipper.v1.ListNodesRequest
+	3,  // 7: skipper.v1.ClusterService.ListMetrics:input_type -> skipper.v1.ListMetricsRequest
+	5,  // 8: skipper.v1.ClusterService.SubmitJob:input_type -> skipper.v1.SubmitJobRequest
+	7,  // 9: skipper.v1.ClusterService.ListJobs:input_type -> skipper.v1.ListJobsRequest
+	9,  // 10: skipper.v1.ClusterService.GetJob:input_type -> skipper.v1.GetJobRequest
+	10, // 11: skipper.v1.ClusterService.CancelJob:input_type -> skipper.v1.CancelJobRequest
+	12, // 12: skipper.v1.ClusterService.GetJobLogs:input_type -> skipper.v1.GetJobLogsRequest
+	1,  // 13: skipper.v1.ClusterService.ListNodes:output_type -> skipper.v1.ListNodesResponse
+	4,  // 14: skipper.v1.ClusterService.ListMetrics:output_type -> skipper.v1.ListMetricsResponse
+	6,  // 15: skipper.v1.ClusterService.SubmitJob:output_type -> skipper.v1.SubmitJobResponse
+	8,  // 16: skipper.v1.ClusterService.ListJobs:output_type -> skipper.v1.ListJobsResponse
+	17, // 17: skipper.v1.ClusterService.GetJob:output_type -> skipper.v1.Job
+	11, // 18: skipper.v1.ClusterService.CancelJob:output_type -> skipper.v1.CancelJobResponse
+	18, // 19: skipper.v1.ClusterService.GetJobLogs:output_type -> skipper.v1.LogChunk
+	13, // [13:20] is the sub-list for method output_type
+	6,  // [6:13] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_skipper_v1_cluster_proto_init() }
@@ -323,13 +815,14 @@ func file_skipper_v1_cluster_proto_init() {
 	}
 	file_skipper_v1_common_proto_init()
 	file_skipper_v1_metrics_proto_init()
+	file_skipper_v1_job_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_skipper_v1_cluster_proto_rawDesc), len(file_skipper_v1_cluster_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

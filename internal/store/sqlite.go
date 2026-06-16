@@ -47,9 +47,11 @@ func OpenSQLite(dsn string) (Store, error) {
 			return nil, fmt.Errorf("pragma %q: %w", p, err)
 		}
 	}
-	if _, err := db.Exec(schema); err != nil {
-		_ = db.Close()
-		return nil, fmt.Errorf("migrate: %w", err)
+	for _, s := range []string{schema, jobSchema} {
+		if _, err := db.Exec(s); err != nil {
+			_ = db.Close()
+			return nil, fmt.Errorf("migrate: %w", err)
+		}
 	}
 	return &sqliteStore{db: db}, nil
 }
@@ -141,6 +143,36 @@ FROM node ORDER BY name;`
 		nodes = append(nodes, &n)
 	}
 	return nodes, rows.Err()
+}
+
+func (s *sqliteStore) GetNode(ctx context.Context, id string) (*Node, error) {
+	const q = `
+SELECT id, name, partition, state, addr, cpus, mem_total_bytes, devices_json, labels_json, agent_version, last_heartbeat
+FROM node WHERE id = ?;`
+	var (
+		n           Node
+		devicesJSON string
+		labelsJSON  string
+		hb          int64
+	)
+	err := s.db.QueryRowContext(ctx, q, id).Scan(&n.ID, &n.Name, &n.Partition, &n.State, &n.Addr,
+		&n.CPUs, &n.MemTotalBytes, &devicesJSON, &labelsJSON, &n.AgentVersion, &hb)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("get node: %w", err)
+	}
+	if devicesJSON != "" {
+		_ = json.Unmarshal([]byte(devicesJSON), &n.Devices)
+	}
+	if labelsJSON != "" {
+		_ = json.Unmarshal([]byte(labelsJSON), &n.Labels)
+	}
+	if hb > 0 {
+		n.LastHeartbeat = time.Unix(hb, 0)
+	}
+	return &n, nil
 }
 
 func (s *sqliteStore) MarkStaleDown(ctx context.Context, olderThan time.Time) (int64, error) {

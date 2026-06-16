@@ -14,6 +14,7 @@ import (
 	skipperv1 "github.com/yqwu905/psychic-funicular/gen/skipper/v1"
 	"github.com/yqwu905/psychic-funicular/internal/config"
 	"github.com/yqwu905/psychic-funicular/internal/metrics"
+	"github.com/yqwu905/psychic-funicular/internal/scheduler"
 	"github.com/yqwu905/psychic-funicular/internal/store"
 	"google.golang.org/grpc"
 )
@@ -39,9 +40,17 @@ func (s *Server) Run(ctx context.Context) error {
 		return err
 	}
 
+	jobLogs, err := newJobLogStore(s.cfg.Jobs.LogsDir)
+	if err != nil {
+		return err
+	}
+
 	s.grpc = grpc.NewServer()
-	skipperv1.RegisterAgentServiceServer(s.grpc, &agentService{store: s.store, metricsStore: s.metrics, log: s.log})
-	skipperv1.RegisterClusterServiceServer(s.grpc, &clusterService{store: s.store, metricsStore: s.metrics, log: s.log})
+	skipperv1.RegisterAgentServiceServer(s.grpc, &agentService{store: s.store, metricsStore: s.metrics, jobLogs: jobLogs, log: s.log})
+	skipperv1.RegisterClusterServiceServer(s.grpc, &clusterService{store: s.store, metricsStore: s.metrics, jobLogs: jobLogs, log: s.log})
+
+	sched := scheduler.New(s.store, s.log, s.cfg.Scheduler.Interval.Std())
+	go sched.Run(ctx)
 
 	go s.reapLoop(ctx)
 	stopHTTP := s.startMetricsHTTP()

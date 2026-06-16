@@ -41,6 +41,12 @@ type ServerConfig struct {
 	Metrics struct {
 		HTTP string `yaml:"http"` // Prometheus 端点监听地址；空则不启用
 	} `yaml:"metrics"`
+	Scheduler struct {
+		Interval Duration `yaml:"interval"` // 调度循环周期
+	} `yaml:"scheduler"`
+	Jobs struct {
+		LogsDir string `yaml:"logs_dir"` // 作业日志存储目录
+	} `yaml:"jobs"`
 	Heartbeat struct {
 		Timeout      Duration `yaml:"timeout"`       // 超过该时长未心跳判定 DOWN
 		ReapInterval Duration `yaml:"reap_interval"` // 巡检失联节点的周期
@@ -57,6 +63,8 @@ func DefaultServer() ServerConfig {
 	c.Store.Driver = "sqlite"
 	c.Store.DSN = "skipper.db"
 	c.Metrics.HTTP = ":9100"
+	c.Scheduler.Interval = Duration(2 * time.Second)
+	c.Jobs.LogsDir = "job-logs"
 	c.Heartbeat.Timeout = Duration(30 * time.Second)
 	c.Heartbeat.ReapInterval = Duration(10 * time.Second)
 	c.Log.Level = "info"
@@ -84,6 +92,9 @@ func LoadServer(path string) (ServerConfig, error) {
 	if v := os.Getenv("SKIPPER_METRICS_HTTP"); v != "" {
 		c.Metrics.HTTP = v
 	}
+	if v := os.Getenv("SKIPPER_JOBS_LOGS_DIR"); v != "" {
+		c.Jobs.LogsDir = v
+	}
 	if v := os.Getenv("SKIPPER_LOG_LEVEL"); v != "" {
 		c.Log.Level = v
 	}
@@ -103,6 +114,9 @@ type AgentConfig struct {
 	Collectors struct {
 		Interval Duration `yaml:"interval"`
 	} `yaml:"collectors"`
+	Jobs struct {
+		PollInterval Duration `yaml:"poll_interval"` // 拉取作业分配的周期
+	} `yaml:"jobs"`
 	Log struct {
 		Level string `yaml:"level"`
 	} `yaml:"log"`
@@ -114,6 +128,7 @@ func DefaultAgent() AgentConfig {
 	c.Server.Addr = "127.0.0.1:7443"
 	c.Node.Partition = "default"
 	c.Collectors.Interval = Duration(10 * time.Second)
+	c.Jobs.PollInterval = Duration(2 * time.Second)
 	c.Log.Level = "info"
 	return c
 }

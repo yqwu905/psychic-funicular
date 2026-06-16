@@ -19,9 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AgentService_RegisterNode_FullMethodName  = "/skipper.v1.AgentService/RegisterNode"
-	AgentService_Heartbeat_FullMethodName     = "/skipper.v1.AgentService/Heartbeat"
-	AgentService_ReportMetrics_FullMethodName = "/skipper.v1.AgentService/ReportMetrics"
+	AgentService_RegisterNode_FullMethodName    = "/skipper.v1.AgentService/RegisterNode"
+	AgentService_Heartbeat_FullMethodName       = "/skipper.v1.AgentService/Heartbeat"
+	AgentService_ReportMetrics_FullMethodName   = "/skipper.v1.AgentService/ReportMetrics"
+	AgentService_PollAssignments_FullMethodName = "/skipper.v1.AgentService/PollAssignments"
+	AgentService_UpdateJobStatus_FullMethodName = "/skipper.v1.AgentService/UpdateJobStatus"
+	AgentService_AppendLogs_FullMethodName      = "/skipper.v1.AgentService/AppendLogs"
 )
 
 // AgentServiceClient is the client API for AgentService service.
@@ -34,6 +37,12 @@ type AgentServiceClient interface {
 	Heartbeat(ctx context.Context, in *HeartbeatRequest, opts ...grpc.CallOption) (*HeartbeatResponse, error)
 	// ReportMetrics 周期上报一次完整指标快照，同时充当存活信号。
 	ReportMetrics(ctx context.Context, in *ReportMetricsRequest, opts ...grpc.CallOption) (*ReportMetricsResponse, error)
+	// PollAssignments 拉取本节点待执行/待取消的作业（轮询式下发，兼容 SSH 反向场景）。
+	PollAssignments(ctx context.Context, in *PollAssignmentsRequest, opts ...grpc.CallOption) (*PollAssignmentsResponse, error)
+	// UpdateJobStatus 上报作业状态变更（RUNNING / 终态及退出码）。
+	UpdateJobStatus(ctx context.Context, in *UpdateJobStatusRequest, opts ...grpc.CallOption) (*UpdateJobStatusResponse, error)
+	// AppendLogs 追加一段作业日志。
+	AppendLogs(ctx context.Context, in *AppendLogsRequest, opts ...grpc.CallOption) (*AppendLogsResponse, error)
 }
 
 type agentServiceClient struct {
@@ -74,6 +83,36 @@ func (c *agentServiceClient) ReportMetrics(ctx context.Context, in *ReportMetric
 	return out, nil
 }
 
+func (c *agentServiceClient) PollAssignments(ctx context.Context, in *PollAssignmentsRequest, opts ...grpc.CallOption) (*PollAssignmentsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PollAssignmentsResponse)
+	err := c.cc.Invoke(ctx, AgentService_PollAssignments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *agentServiceClient) UpdateJobStatus(ctx context.Context, in *UpdateJobStatusRequest, opts ...grpc.CallOption) (*UpdateJobStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateJobStatusResponse)
+	err := c.cc.Invoke(ctx, AgentService_UpdateJobStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *agentServiceClient) AppendLogs(ctx context.Context, in *AppendLogsRequest, opts ...grpc.CallOption) (*AppendLogsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AppendLogsResponse)
+	err := c.cc.Invoke(ctx, AgentService_AppendLogs_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AgentServiceServer is the server API for AgentService service.
 // All implementations must embed UnimplementedAgentServiceServer
 // for forward compatibility.
@@ -84,6 +123,12 @@ type AgentServiceServer interface {
 	Heartbeat(context.Context, *HeartbeatRequest) (*HeartbeatResponse, error)
 	// ReportMetrics 周期上报一次完整指标快照，同时充当存活信号。
 	ReportMetrics(context.Context, *ReportMetricsRequest) (*ReportMetricsResponse, error)
+	// PollAssignments 拉取本节点待执行/待取消的作业（轮询式下发，兼容 SSH 反向场景）。
+	PollAssignments(context.Context, *PollAssignmentsRequest) (*PollAssignmentsResponse, error)
+	// UpdateJobStatus 上报作业状态变更（RUNNING / 终态及退出码）。
+	UpdateJobStatus(context.Context, *UpdateJobStatusRequest) (*UpdateJobStatusResponse, error)
+	// AppendLogs 追加一段作业日志。
+	AppendLogs(context.Context, *AppendLogsRequest) (*AppendLogsResponse, error)
 	mustEmbedUnimplementedAgentServiceServer()
 }
 
@@ -102,6 +147,15 @@ func (UnimplementedAgentServiceServer) Heartbeat(context.Context, *HeartbeatRequ
 }
 func (UnimplementedAgentServiceServer) ReportMetrics(context.Context, *ReportMetricsRequest) (*ReportMetricsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ReportMetrics not implemented")
+}
+func (UnimplementedAgentServiceServer) PollAssignments(context.Context, *PollAssignmentsRequest) (*PollAssignmentsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PollAssignments not implemented")
+}
+func (UnimplementedAgentServiceServer) UpdateJobStatus(context.Context, *UpdateJobStatusRequest) (*UpdateJobStatusResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateJobStatus not implemented")
+}
+func (UnimplementedAgentServiceServer) AppendLogs(context.Context, *AppendLogsRequest) (*AppendLogsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AppendLogs not implemented")
 }
 func (UnimplementedAgentServiceServer) mustEmbedUnimplementedAgentServiceServer() {}
 func (UnimplementedAgentServiceServer) testEmbeddedByValue()                      {}
@@ -178,6 +232,60 @@ func _AgentService_ReportMetrics_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AgentService_PollAssignments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PollAssignmentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentServiceServer).PollAssignments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentService_PollAssignments_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentServiceServer).PollAssignments(ctx, req.(*PollAssignmentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AgentService_UpdateJobStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateJobStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentServiceServer).UpdateJobStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentService_UpdateJobStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentServiceServer).UpdateJobStatus(ctx, req.(*UpdateJobStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AgentService_AppendLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AppendLogsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentServiceServer).AppendLogs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentService_AppendLogs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentServiceServer).AppendLogs(ctx, req.(*AppendLogsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AgentService_ServiceDesc is the grpc.ServiceDesc for AgentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -196,6 +304,18 @@ var AgentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReportMetrics",
 			Handler:    _AgentService_ReportMetrics_Handler,
+		},
+		{
+			MethodName: "PollAssignments",
+			Handler:    _AgentService_PollAssignments_Handler,
+		},
+		{
+			MethodName: "UpdateJobStatus",
+			Handler:    _AgentService_UpdateJobStatus_Handler,
+		},
+		{
+			MethodName: "AppendLogs",
+			Handler:    _AgentService_AppendLogs_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

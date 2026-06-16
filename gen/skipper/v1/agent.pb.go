@@ -298,10 +298,9 @@ func (x *ReportMetricsRequest) GetSnapshot() *MetricsSnapshot {
 }
 
 type ReportMetricsResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	Ok    bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
-	// 节点未知时置真（如 server 重启丢状态），提示 Agent 重新注册。
-	ShouldReregister bool `protobuf:"varint,2,opt,name=should_reregister,json=shouldReregister,proto3" json:"should_reregister,omitempty"`
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Ok               bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+	ShouldReregister bool                   `protobuf:"varint,2,opt,name=should_reregister,json=shouldReregister,proto3" json:"should_reregister,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -350,12 +349,324 @@ func (x *ReportMetricsResponse) GetShouldReregister() bool {
 	return false
 }
 
+type PollAssignmentsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	NodeId        string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PollAssignmentsRequest) Reset() {
+	*x = PollAssignmentsRequest{}
+	mi := &file_skipper_v1_agent_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PollAssignmentsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PollAssignmentsRequest) ProtoMessage() {}
+
+func (x *PollAssignmentsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_agent_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PollAssignmentsRequest.ProtoReflect.Descriptor instead.
+func (*PollAssignmentsRequest) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_agent_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *PollAssignmentsRequest) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+type PollAssignmentsResponse struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Run              []*Assignment          `protobuf:"bytes,1,rep,name=run,proto3" json:"run,omitempty"`                                         // 需要启动的作业
+	CancelJobIds     []string               `protobuf:"bytes,2,rep,name=cancel_job_ids,json=cancelJobIds,proto3" json:"cancel_job_ids,omitempty"` // 需要终止的作业
+	ShouldReregister bool                   `protobuf:"varint,3,opt,name=should_reregister,json=shouldReregister,proto3" json:"should_reregister,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *PollAssignmentsResponse) Reset() {
+	*x = PollAssignmentsResponse{}
+	mi := &file_skipper_v1_agent_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PollAssignmentsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PollAssignmentsResponse) ProtoMessage() {}
+
+func (x *PollAssignmentsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_agent_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PollAssignmentsResponse.ProtoReflect.Descriptor instead.
+func (*PollAssignmentsResponse) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_agent_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *PollAssignmentsResponse) GetRun() []*Assignment {
+	if x != nil {
+		return x.Run
+	}
+	return nil
+}
+
+func (x *PollAssignmentsResponse) GetCancelJobIds() []string {
+	if x != nil {
+		return x.CancelJobIds
+	}
+	return nil
+}
+
+func (x *PollAssignmentsResponse) GetShouldReregister() bool {
+	if x != nil {
+		return x.ShouldReregister
+	}
+	return false
+}
+
+type UpdateJobStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	State         string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	ExitCode      int32                  `protobuf:"varint,3,opt,name=exit_code,json=exitCode,proto3" json:"exit_code,omitempty"`
+	Reason        string                 `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateJobStatusRequest) Reset() {
+	*x = UpdateJobStatusRequest{}
+	mi := &file_skipper_v1_agent_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateJobStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateJobStatusRequest) ProtoMessage() {}
+
+func (x *UpdateJobStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_agent_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateJobStatusRequest.ProtoReflect.Descriptor instead.
+func (*UpdateJobStatusRequest) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_agent_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *UpdateJobStatusRequest) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+func (x *UpdateJobStatusRequest) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *UpdateJobStatusRequest) GetExitCode() int32 {
+	if x != nil {
+		return x.ExitCode
+	}
+	return 0
+}
+
+func (x *UpdateJobStatusRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+type UpdateJobStatusResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ok            bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateJobStatusResponse) Reset() {
+	*x = UpdateJobStatusResponse{}
+	mi := &file_skipper_v1_agent_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateJobStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateJobStatusResponse) ProtoMessage() {}
+
+func (x *UpdateJobStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_agent_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateJobStatusResponse.ProtoReflect.Descriptor instead.
+func (*UpdateJobStatusResponse) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_agent_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *UpdateJobStatusResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
+type AppendLogsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	Data          []byte                 `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AppendLogsRequest) Reset() {
+	*x = AppendLogsRequest{}
+	mi := &file_skipper_v1_agent_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AppendLogsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AppendLogsRequest) ProtoMessage() {}
+
+func (x *AppendLogsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_agent_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AppendLogsRequest.ProtoReflect.Descriptor instead.
+func (*AppendLogsRequest) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_agent_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *AppendLogsRequest) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+func (x *AppendLogsRequest) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+type AppendLogsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ok            bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AppendLogsResponse) Reset() {
+	*x = AppendLogsResponse{}
+	mi := &file_skipper_v1_agent_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AppendLogsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AppendLogsResponse) ProtoMessage() {}
+
+func (x *AppendLogsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_agent_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AppendLogsResponse.ProtoReflect.Descriptor instead.
+func (*AppendLogsResponse) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_agent_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *AppendLogsResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
 var File_skipper_v1_agent_proto protoreflect.FileDescriptor
 
 const file_skipper_v1_agent_proto_rawDesc = "" +
 	"\n" +
 	"\x16skipper/v1/agent.proto\x12\n" +
-	"skipper.v1\x1a\x17skipper/v1/common.proto\x1a\x18skipper/v1/metrics.proto\"\xa1\x02\n" +
+	"skipper.v1\x1a\x17skipper/v1/common.proto\x1a\x18skipper/v1/metrics.proto\x1a\x14skipper/v1/job.proto\"\xa1\x02\n" +
 	"\x13RegisterNodeRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1c\n" +
 	"\tpartition\x18\x02 \x01(\tR\tpartition\x123\n" +
@@ -378,11 +689,33 @@ const file_skipper_v1_agent_proto_rawDesc = "" +
 	"\bsnapshot\x18\x02 \x01(\v2\x1b.skipper.v1.MetricsSnapshotR\bsnapshot\"T\n" +
 	"\x15ReportMetricsResponse\x12\x0e\n" +
 	"\x02ok\x18\x01 \x01(\bR\x02ok\x12+\n" +
-	"\x11should_reregister\x18\x02 \x01(\bR\x10shouldReregister2\x81\x02\n" +
+	"\x11should_reregister\x18\x02 \x01(\bR\x10shouldReregister\"1\n" +
+	"\x16PollAssignmentsRequest\x12\x17\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\"\x96\x01\n" +
+	"\x17PollAssignmentsResponse\x12(\n" +
+	"\x03run\x18\x01 \x03(\v2\x16.skipper.v1.AssignmentR\x03run\x12$\n" +
+	"\x0ecancel_job_ids\x18\x02 \x03(\tR\fcancelJobIds\x12+\n" +
+	"\x11should_reregister\x18\x03 \x01(\bR\x10shouldReregister\"z\n" +
+	"\x16UpdateJobStatusRequest\x12\x15\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x14\n" +
+	"\x05state\x18\x02 \x01(\tR\x05state\x12\x1b\n" +
+	"\texit_code\x18\x03 \x01(\x05R\bexitCode\x12\x16\n" +
+	"\x06reason\x18\x04 \x01(\tR\x06reason\")\n" +
+	"\x17UpdateJobStatusResponse\x12\x0e\n" +
+	"\x02ok\x18\x01 \x01(\bR\x02ok\">\n" +
+	"\x11AppendLogsRequest\x12\x15\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x12\n" +
+	"\x04data\x18\x02 \x01(\fR\x04data\"$\n" +
+	"\x12AppendLogsResponse\x12\x0e\n" +
+	"\x02ok\x18\x01 \x01(\bR\x02ok2\x86\x04\n" +
 	"\fAgentService\x12Q\n" +
 	"\fRegisterNode\x12\x1f.skipper.v1.RegisterNodeRequest\x1a .skipper.v1.RegisterNodeResponse\x12H\n" +
 	"\tHeartbeat\x12\x1c.skipper.v1.HeartbeatRequest\x1a\x1d.skipper.v1.HeartbeatResponse\x12T\n" +
-	"\rReportMetrics\x12 .skipper.v1.ReportMetricsRequest\x1a!.skipper.v1.ReportMetricsResponseB?Z=github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1b\x06proto3"
+	"\rReportMetrics\x12 .skipper.v1.ReportMetricsRequest\x1a!.skipper.v1.ReportMetricsResponse\x12Z\n" +
+	"\x0fPollAssignments\x12\".skipper.v1.PollAssignmentsRequest\x1a#.skipper.v1.PollAssignmentsResponse\x12Z\n" +
+	"\x0fUpdateJobStatus\x12\".skipper.v1.UpdateJobStatusRequest\x1a#.skipper.v1.UpdateJobStatusResponse\x12K\n" +
+	"\n" +
+	"AppendLogs\x12\x1d.skipper.v1.AppendLogsRequest\x1a\x1e.skipper.v1.AppendLogsResponseB?Z=github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1b\x06proto3"
 
 var (
 	file_skipper_v1_agent_proto_rawDescOnce sync.Once
@@ -396,34 +729,48 @@ func file_skipper_v1_agent_proto_rawDescGZIP() []byte {
 	return file_skipper_v1_agent_proto_rawDescData
 }
 
-var file_skipper_v1_agent_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_skipper_v1_agent_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_skipper_v1_agent_proto_goTypes = []any{
-	(*RegisterNodeRequest)(nil),   // 0: skipper.v1.RegisterNodeRequest
-	(*RegisterNodeResponse)(nil),  // 1: skipper.v1.RegisterNodeResponse
-	(*HeartbeatRequest)(nil),      // 2: skipper.v1.HeartbeatRequest
-	(*HeartbeatResponse)(nil),     // 3: skipper.v1.HeartbeatResponse
-	(*ReportMetricsRequest)(nil),  // 4: skipper.v1.ReportMetricsRequest
-	(*ReportMetricsResponse)(nil), // 5: skipper.v1.ReportMetricsResponse
-	nil,                           // 6: skipper.v1.RegisterNodeRequest.LabelsEntry
-	(*Resources)(nil),             // 7: skipper.v1.Resources
-	(*MetricsSnapshot)(nil),       // 8: skipper.v1.MetricsSnapshot
+	(*RegisterNodeRequest)(nil),     // 0: skipper.v1.RegisterNodeRequest
+	(*RegisterNodeResponse)(nil),    // 1: skipper.v1.RegisterNodeResponse
+	(*HeartbeatRequest)(nil),        // 2: skipper.v1.HeartbeatRequest
+	(*HeartbeatResponse)(nil),       // 3: skipper.v1.HeartbeatResponse
+	(*ReportMetricsRequest)(nil),    // 4: skipper.v1.ReportMetricsRequest
+	(*ReportMetricsResponse)(nil),   // 5: skipper.v1.ReportMetricsResponse
+	(*PollAssignmentsRequest)(nil),  // 6: skipper.v1.PollAssignmentsRequest
+	(*PollAssignmentsResponse)(nil), // 7: skipper.v1.PollAssignmentsResponse
+	(*UpdateJobStatusRequest)(nil),  // 8: skipper.v1.UpdateJobStatusRequest
+	(*UpdateJobStatusResponse)(nil), // 9: skipper.v1.UpdateJobStatusResponse
+	(*AppendLogsRequest)(nil),       // 10: skipper.v1.AppendLogsRequest
+	(*AppendLogsResponse)(nil),      // 11: skipper.v1.AppendLogsResponse
+	nil,                             // 12: skipper.v1.RegisterNodeRequest.LabelsEntry
+	(*Resources)(nil),               // 13: skipper.v1.Resources
+	(*MetricsSnapshot)(nil),         // 14: skipper.v1.MetricsSnapshot
+	(*Assignment)(nil),              // 15: skipper.v1.Assignment
 }
 var file_skipper_v1_agent_proto_depIdxs = []int32{
-	7, // 0: skipper.v1.RegisterNodeRequest.resources:type_name -> skipper.v1.Resources
-	6, // 1: skipper.v1.RegisterNodeRequest.labels:type_name -> skipper.v1.RegisterNodeRequest.LabelsEntry
-	7, // 2: skipper.v1.HeartbeatRequest.resources:type_name -> skipper.v1.Resources
-	8, // 3: skipper.v1.ReportMetricsRequest.snapshot:type_name -> skipper.v1.MetricsSnapshot
-	0, // 4: skipper.v1.AgentService.RegisterNode:input_type -> skipper.v1.RegisterNodeRequest
-	2, // 5: skipper.v1.AgentService.Heartbeat:input_type -> skipper.v1.HeartbeatRequest
-	4, // 6: skipper.v1.AgentService.ReportMetrics:input_type -> skipper.v1.ReportMetricsRequest
-	1, // 7: skipper.v1.AgentService.RegisterNode:output_type -> skipper.v1.RegisterNodeResponse
-	3, // 8: skipper.v1.AgentService.Heartbeat:output_type -> skipper.v1.HeartbeatResponse
-	5, // 9: skipper.v1.AgentService.ReportMetrics:output_type -> skipper.v1.ReportMetricsResponse
-	7, // [7:10] is the sub-list for method output_type
-	4, // [4:7] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	13, // 0: skipper.v1.RegisterNodeRequest.resources:type_name -> skipper.v1.Resources
+	12, // 1: skipper.v1.RegisterNodeRequest.labels:type_name -> skipper.v1.RegisterNodeRequest.LabelsEntry
+	13, // 2: skipper.v1.HeartbeatRequest.resources:type_name -> skipper.v1.Resources
+	14, // 3: skipper.v1.ReportMetricsRequest.snapshot:type_name -> skipper.v1.MetricsSnapshot
+	15, // 4: skipper.v1.PollAssignmentsResponse.run:type_name -> skipper.v1.Assignment
+	0,  // 5: skipper.v1.AgentService.RegisterNode:input_type -> skipper.v1.RegisterNodeRequest
+	2,  // 6: skipper.v1.AgentService.Heartbeat:input_type -> skipper.v1.HeartbeatRequest
+	4,  // 7: skipper.v1.AgentService.ReportMetrics:input_type -> skipper.v1.ReportMetricsRequest
+	6,  // 8: skipper.v1.AgentService.PollAssignments:input_type -> skipper.v1.PollAssignmentsRequest
+	8,  // 9: skipper.v1.AgentService.UpdateJobStatus:input_type -> skipper.v1.UpdateJobStatusRequest
+	10, // 10: skipper.v1.AgentService.AppendLogs:input_type -> skipper.v1.AppendLogsRequest
+	1,  // 11: skipper.v1.AgentService.RegisterNode:output_type -> skipper.v1.RegisterNodeResponse
+	3,  // 12: skipper.v1.AgentService.Heartbeat:output_type -> skipper.v1.HeartbeatResponse
+	5,  // 13: skipper.v1.AgentService.ReportMetrics:output_type -> skipper.v1.ReportMetricsResponse
+	7,  // 14: skipper.v1.AgentService.PollAssignments:output_type -> skipper.v1.PollAssignmentsResponse
+	9,  // 15: skipper.v1.AgentService.UpdateJobStatus:output_type -> skipper.v1.UpdateJobStatusResponse
+	11, // 16: skipper.v1.AgentService.AppendLogs:output_type -> skipper.v1.AppendLogsResponse
+	11, // [11:17] is the sub-list for method output_type
+	5,  // [5:11] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_skipper_v1_agent_proto_init() }
@@ -433,13 +780,14 @@ func file_skipper_v1_agent_proto_init() {
 	}
 	file_skipper_v1_common_proto_init()
 	file_skipper_v1_metrics_proto_init()
+	file_skipper_v1_job_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_skipper_v1_agent_proto_rawDesc), len(file_skipper_v1_agent_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

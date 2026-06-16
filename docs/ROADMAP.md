@@ -20,12 +20,14 @@
 - ✅ Prometheus `/metrics` 端点；`skctl top`/`gpu`/`npu` 展示实时资源。
 - ✅ **已演示**：实时看到各节点 CPU/内存/磁盘利用率（有卡环境同样可见 GPU/NPU）。
 
-### M2 — 调度 MVP
-- node/partition/job/allocation 模型与状态机。
-- FIFO + 优先级调度循环；单节点作业执行。
-- 执行器：cgroup v2 限额、`CUDA_VISIBLE_DEVICES`、日志捕获、退出码上报。
-- `skctl submit/queue/cancel/logs`。
-- **可演示**：提交 GPU 作业、排队、运行、看日志、结束回收。
+### M2 — 调度 MVP ✅（已完成）
+- ✅ 作业模型与状态机（PENDING→ASSIGNED→RUNNING→COMPLETED/FAILED/CANCELLED/TIMEOUT）。
+- ✅ FIFO+优先级调度（纯函数 `Plan`：分区/CPU/内存/设备匹配 + 资源核算，附单测），轮询式下发。
+- ✅ 执行器：进程组管理、设备隔离（`CUDA_VISIBLE_DEVICES`/`ASCEND_RT_VISIBLE_DEVICES`）、
+  walltime 超时（SIGTERM→SIGKILL）、日志流式捕获、退出码上报。
+- ✅ `skctl submit/queue/cancel/logs`。
+- ✅ **已演示**：提交→排队→运行→看日志→完成/失败/取消/超时全链路。
+- ⏭ cgroup v2 CPU/内存硬限额下沉到 M5 硬化（M2 已实现 env 设备隔离，cgroup 强约束待补）。
 
 ### M3 — SSH 传输
 - 传输抽象；SSH 本地转发（控制平面发起）打通「仅 SSH」容器。

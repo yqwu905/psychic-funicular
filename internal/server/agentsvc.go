@@ -18,6 +18,7 @@ type agentService struct {
 	skipperv1.UnimplementedAgentServiceServer
 	store        store.Store
 	metricsStore *metrics.Store
+	jobLogs      *jobLogStore
 	log          *slog.Logger
 }
 

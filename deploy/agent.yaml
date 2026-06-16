@@ -8,5 +8,7 @@ node:
     zone: "lab"
 collectors:
   interval: "10s"       # 采样与心跳周期
+jobs:
+  poll_interval: "2s"   # 拉取作业分配的周期
 log:
   level: "info"

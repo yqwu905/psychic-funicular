@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package skipper.v1;
+
+option go_package = "github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1";
+
+// 作业的资源请求。
+message ResourceRequest {
+  uint32 cpus = 1;
+  uint64 mem_bytes = 2;
+  uint32 gpus = 3;         // 加速设备数量（GPU/NPU 统称）
+  string gpu_type = 4;     // 可选型号约束（M2 暂存不强制）
+  int64 walltime_sec = 5;  // 最大运行时长；<=0 表示不限
+}
+
+// 分配到的一块设备。
+message DeviceAssignment {
+  string kind = 1; // "gpu" | "npu"
+  uint32 index = 2;
+}
+
+// Job 是对外的作业视图。
+message Job {
+  string id = 1;
+  string name = 2;
+  string owner = 3;
+  string partition = 4;
+  string state = 5; // PENDING/ASSIGNED/RUNNING/COMPLETED/FAILED/CANCELLING/CANCELLED/TIMEOUT
+  int32 priority = 6;
+  string command = 7;
+  map<string, string> env = 8;
+  string workdir = 9;
+  ResourceRequest request = 10;
+  string node_id = 11;
+  string node_name = 12;
+  repeated DeviceAssignment devices = 13;
+  int32 exit_code = 14;
+  string reason = 15;
+  int64 submit_at_unix = 16;
+  int64 start_at_unix = 17;
+  int64 end_at_unix = 18;
+}
+
+// Assignment 是控制平面下发给 Agent 的一次执行指令。
+message Assignment {
+  string job_id = 1;
+  string command = 2;
+  map<string, string> env = 3;
+  string workdir = 4;
+  repeated DeviceAssignment devices = 5;
+  int64 walltime_sec = 6;
+}
+
+// LogChunk 是一段作业日志。
+message LogChunk {
+  bytes data = 1;
+}

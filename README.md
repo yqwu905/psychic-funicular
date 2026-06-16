@@ -61,7 +61,7 @@ flowchart LR
 
 ## 仓库结构
 
-`✅` 已实现（M0–M1）；其余为后续里程碑规划。
+`✅` 已实现（M0–M2）；其余为后续里程碑规划。
 
 ```
 .
@@ -78,7 +78,7 @@ flowchart LR
 │   ├── store/               # ✅ 持久化接口 + SQLite 实现
 │   ├── collector/           # ✅ CPU/内存/磁盘 + GPU(nvidia)/NPU(ascend) 采集
 │   ├── metrics/             # ✅ 近线指标存储（最新快照）
-│   ├── scheduler/           #    调度策略与作业生命周期（M2）
+│   ├── scheduler/           # ✅ FIFO+优先级调度（纯函数 Plan + 调度循环）
 │   ├── transport/           #    SSH 隧道 / 反向隧道（M3）
 │   └── notify/              #    事件引擎 + 通知器接口（M4）
 ├── api/proto/               # ✅ .proto 接口契约
@@ -132,7 +132,14 @@ make build            # 或 go build -o bin/ ./cmd/...
 ./bin/skctl gpu        # 各节点 GPU 实时指标（需 nvidia-smi）
 ./bin/skctl npu        # 各节点 NPU 实时指标（需 npu-smi）
 
-# 5) Prometheus 指标端点
+# 5) 提交并管理作业
+./bin/skctl submit --name train --partition gpu --gpus 1 --mem 32G --time 12h \
+  -- 'python train.py --config big.yaml'
+./bin/skctl queue                # 查看队列与状态
+./bin/skctl logs -f <jobid>      # 跟踪作业日志
+./bin/skctl cancel <jobid>       # 取消作业
+
+# 6) Prometheus 指标端点
 curl -s localhost:9100/metrics | grep '^skipper_'
 ```
 
@@ -141,10 +148,11 @@ curl -s localhost:9100/metrics | grep '^skipper_'
 
 ## 当前状态
 
-✅ **M0 骨架 + M1 监控 MVP 已完成**：
+✅ **M0 骨架 + M1 监控 + M2 调度 MVP 已完成**：
 - **M0**：gRPC 骨架、配置/日志、SQLite 存储、注册/心跳、失联巡检、CI、容器化。
-- **M1**：CPU/内存/磁盘 + GPU(nvidia-smi)/NPU(npu-smi) 采集器、注册即上报 + 周期采样、
-  近线指标存储、Prometheus `/metrics`、`skctl top/gpu/npu`。实时监控端到端已跑通。
+- **M1**：CPU/内存/磁盘 + GPU(nvidia-smi)/NPU(npu-smi) 采集、Prometheus `/metrics`、`skctl top/gpu/npu`。
+- **M2**：作业模型与状态机、FIFO+优先级调度、单节点执行（设备隔离 `CUDA/ASCEND_VISIBLE_DEVICES`
+  + walltime + 日志捕获 + 退出码）、`skctl submit/queue/cancel/logs`。提交→排队→运行→取消/超时全程已跑通。
 
-🚧 下一步 **M2 调度 MVP**：作业模型与状态机、FIFO+优先级调度、单节点执行（cgroup +
-设备隔离）、`skctl submit/queue/cancel/logs`。里程碑详见 [docs/ROADMAP.md](docs/ROADMAP.md)。
+🚧 下一步 **M3 SSH 传输**：传输抽象 + SSH 本地转发，打通「仅开放 22 端口」的 Docker 容器。
+里程碑详见 [docs/ROADMAP.md](docs/ROADMAP.md)。

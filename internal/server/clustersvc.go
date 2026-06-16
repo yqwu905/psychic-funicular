@@ -16,6 +16,7 @@ type clusterService struct {
 	skipperv1.UnimplementedClusterServiceServer
 	store        store.Store
 	metricsStore *metrics.Store
+	jobLogs      *jobLogStore
 	log          *slog.Logger
 }
 
