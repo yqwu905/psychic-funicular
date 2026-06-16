@@ -29,6 +29,16 @@ func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
 // Std 返回标准库 time.Duration。
 func (d Duration) Std() time.Duration { return time.Duration(d) }
 
+// SSHNodeConfig 描述一个经 SSH 隧道纳管的节点（容器仅开放 SSH 端口的场景）。
+type SSHNodeConfig struct {
+	Name         string `yaml:"name"`          // 节点名(仅日志)
+	Addr         string `yaml:"addr"`          // 容器 sshd 可达地址 host:port(端口任意)
+	User         string `yaml:"user"`          // SSH 用户
+	Key          string `yaml:"key"`           // SSH 私钥路径
+	KnownHost    string `yaml:"known_host"`    // 主机公钥行；空则跳过校验(不安全)
+	RemoteListen string `yaml:"remote_listen"` // 容器内回环监听地址，Agent 拨号此处
+}
+
 // ServerConfig 是控制平面配置。
 type ServerConfig struct {
 	Listen struct {
@@ -51,7 +61,8 @@ type ServerConfig struct {
 		Timeout      Duration `yaml:"timeout"`       // 超过该时长未心跳判定 DOWN
 		ReapInterval Duration `yaml:"reap_interval"` // 巡检失联节点的周期
 	} `yaml:"heartbeat"`
-	Log struct {
+	SSHNodes []SSHNodeConfig `yaml:"ssh_nodes"` // 经 SSH 隧道纳管的节点列表
+	Log      struct {
 		Level string `yaml:"level"`
 	} `yaml:"log"`
 }

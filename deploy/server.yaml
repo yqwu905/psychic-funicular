@@ -15,3 +15,13 @@ heartbeat:
   reap_interval: "10s"  # 失联巡检周期
 log:
   level: "info"         # debug | info | warn | error
+
+# 经 SSH 隧道纳管「仅开放 SSH 端口」的容器（SSH 端口任意，不限 22）。
+# 控制平面 SSH 进容器并反向转发，Agent 在容器内用 --server 指向 remote_listen。
+# ssh_nodes:
+#   - name: gpu-docker-07
+#     addr: "gpu-host-07:2207"            # 容器 sshd 可达地址(反代/映射后的任意端口)
+#     user: root
+#     key: "/etc/skipper/keys/node07"     # SSH 私钥
+#     known_host: "ssh-ed25519 AAAA..."   # 主机公钥(ssh-keyscan -p 2207 host)；空则跳过校验(不安全)
+#     remote_listen: "127.0.0.1:7600"     # 容器内回环端口，Agent 用 --server 指向它

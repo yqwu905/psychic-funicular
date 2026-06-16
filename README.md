@@ -61,7 +61,7 @@ flowchart LR
 
 ## 仓库结构
 
-`✅` 已实现（M0–M2）；其余为后续里程碑规划。
+`✅` 已实现（M0–M3）；其余为后续里程碑规划。
 
 ```
 .
@@ -79,7 +79,7 @@ flowchart LR
 │   ├── collector/           # ✅ CPU/内存/磁盘 + GPU(nvidia)/NPU(ascend) 采集
 │   ├── metrics/             # ✅ 近线指标存储（最新快照）
 │   ├── scheduler/           # ✅ FIFO+优先级调度（纯函数 Plan + 调度循环）
-│   ├── transport/           #    SSH 隧道 / 反向隧道（M3）
+│   ├── transport/           # ✅ SSH 反向隧道（仅开放 SSH 端口的容器，端口不限 22）
 │   └── notify/              #    事件引擎 + 通知器接口（M4）
 ├── api/proto/               # ✅ .proto 接口契约
 ├── gen/                     # ✅ 生成的 gRPC 代码（已提交）
@@ -148,11 +148,13 @@ curl -s localhost:9100/metrics | grep '^skipper_'
 
 ## 当前状态
 
-✅ **M0 骨架 + M1 监控 + M2 调度 MVP 已完成**：
+✅ **M0 骨架 + M1 监控 + M2 调度 + M3 SSH 传输 已完成**：
 - **M0**：gRPC 骨架、配置/日志、SQLite 存储、注册/心跳、失联巡检、CI、容器化。
 - **M1**：CPU/内存/磁盘 + GPU(nvidia-smi)/NPU(npu-smi) 采集、Prometheus `/metrics`、`skctl top/gpu/npu`。
 - **M2**：作业模型与状态机、FIFO+优先级调度、单节点执行（设备隔离 `CUDA/ASCEND_VISIBLE_DEVICES`
-  + walltime + 日志捕获 + 退出码）、`skctl submit/queue/cancel/logs`。提交→排队→运行→取消/超时全程已跑通。
+  + walltime + 日志捕获 + 退出码）、`skctl submit/queue/cancel/logs`。
+- **M3**：SSH 反向隧道，纳管「仅开放 SSH 端口」的容器（**端口任意，不限 22**）；主机公钥校验、
+  断线重连、保活。已用真实 sshd(2222) 端到端验证：注册/调度/执行/日志全走 SSH 连接。
 
-🚧 下一步 **M3 SSH 传输**：传输抽象 + SSH 本地转发，打通「仅开放 22 端口」的 Docker 容器。
+🚧 下一步 **M4 事件与通知**：事件引擎 + 规则路由 + 通知器接口，覆盖硬盘满 / 设备空置 / 任务结束。
 里程碑详见 [docs/ROADMAP.md](docs/ROADMAP.md)。

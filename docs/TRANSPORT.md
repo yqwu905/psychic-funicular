@@ -78,6 +78,26 @@ grpcConn, _ := grpc.DialContext(ctx, "passthrough:///agent",
 - **SSH 远程转发（`ssh -R`）**：Agent 用 SSH 连到 Server 主机并远程转发一个端口回来，
   Server 经该端口直连 Agent。适合已有 SSH 跳板的环境。
 
+### 2.4 实现现状（M3 已落地）
+
+由于本实现的 **Agent 是 gRPC 客户端**（主动连 server），M3 落地的是「**控制平面发起 SSH
++ 反向端口转发**」：控制平面 SSH 进容器（SSH 端口**任意，不限 22**），请求 sshd 在容器回环
+上监听一个端口并经 SSH 通道转发回控制平面 gRPC；容器内 Agent 只需 `--server` 指向该回环端口。
+等价于 `ssh -R`，容器除 SSH 外无需开放/出站任何端口。已实现主机公钥校验、断线重连与保活。
+
+```yaml
+# server 配置片段
+ssh_nodes:
+  - name: gpu-docker-07
+    addr: "gpu-host-07:2207"          # 容器 sshd 可达地址(端口任意)
+    user: root
+    key: "/etc/skipper/keys/node07"
+    known_host: "ssh-ed25519 AAAA..." # 主机公钥(ssh-keyscan -p 2207 host)
+    remote_listen: "127.0.0.1:7600"   # Agent 用 --server 127.0.0.1:7600 连接
+```
+
+> Agent 自举（推送二进制 + 远程启动）当前为手动步骤（`scp -P <port>` + 运行），自动化列为后续项。
+
 ## 3. 模式选择与配置
 
 每个节点在注册时声明其传输方式：

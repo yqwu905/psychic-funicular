@@ -16,6 +16,7 @@ import (
 	"github.com/yqwu905/psychic-funicular/internal/metrics"
 	"github.com/yqwu905/psychic-funicular/internal/scheduler"
 	"github.com/yqwu905/psychic-funicular/internal/store"
+	"github.com/yqwu905/psychic-funicular/internal/transport"
 	"google.golang.org/grpc"
 )
 
@@ -51,6 +52,8 @@ func (s *Server) Run(ctx context.Context) error {
 
 	sched := scheduler.New(s.store, s.log, s.cfg.Scheduler.Interval.Std())
 	go sched.Run(ctx)
+
+	s.startSSHTunnels(ctx)
 
 	go s.reapLoop(ctx)
 	stopHTTP := s.startMetricsHTTP()
@@ -123,4 +126,36 @@ func (s *Server) reapLoop(ctx context.Context) {
 			}
 		}
 	}
+}
+
+// startSSHTunnels 为配置中的 SSH 节点建立反向转发隧道（适配仅开放 SSH 端口的容器）。
+func (s *Server) startSSHTunnels(ctx context.Context) {
+	if len(s.cfg.SSHNodes) == 0 {
+		return
+	}
+	forwardTo := localDialTarget(s.cfg.Listen.GRPC)
+	for _, sn := range s.cfg.SSHNodes {
+		rl := sn.RemoteListen
+		if rl == "" {
+			rl = "127.0.0.1:7600"
+		}
+		t := transport.NewSSHTunnel(transport.Config{
+			Name: sn.Name, Addr: sn.Addr, User: sn.User,
+			KeyPath: sn.Key, KnownHost: sn.KnownHost, RemoteListen: rl,
+		}, forwardTo, s.log)
+		go t.Run(ctx)
+	}
+	s.log.Info("ssh tunnels starting", "count", len(s.cfg.SSHNodes), "forward_to", forwardTo)
+}
+
+// localDialTarget 把监听地址(可能是 :7443 / 0.0.0.0:7443)转成可拨号的本地地址。
+func localDialTarget(listen string) string {
+	host, port, err := net.SplitHostPort(listen)
+	if err != nil {
+		return listen
+	}
+	if host == "" || host == "0.0.0.0" || host == "::" {
+		host = "127.0.0.1"
+	}
+	return net.JoinHostPort(host, port)
 }
