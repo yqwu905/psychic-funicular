@@ -13,9 +13,10 @@
 
 ### M1 — 监控 MVP
 - 采集器接口 + CPU/内存/磁盘 + NVIDIA GPU（NVML，降级 nvidia-smi）。
+- 昇腾 NPU 采集（`npu-smi info`，统一到 `Device` 抽象）。
 - Agent 周期采样、批量上报；Server 指标存储与查询。
-- Prometheus 端点；`skctl nodes`/`skctl gpu` 展示实时资源。
-- **可演示**：实时看到各节点 CPU/内存/磁盘/GPU 利用率。
+- Prometheus 端点；`skctl nodes`/`skctl gpu`/`skctl npu` 展示实时资源。
+- **可演示**：实时看到各节点 CPU/内存/磁盘/GPU/NPU 利用率。
 
 ### M2 — 调度 MVP
 - node/partition/job/allocation 模型与状态机。
@@ -37,22 +38,21 @@
 - 用户联系方式/偏好；`skctl notify test`。
 - **可演示**：磁盘超阈值、GPU 空置、任务结束分别触达对应用户。
 
-### M5 — 增强与硬化
-- NPU（昇腾）采集与调度；反向隧道模式。
+### M5 — 增强与硬化（按需）
+- 昇腾 NPU 调度（`ASCEND_RT_VISIBLE_DEVICES` 分配）；反向隧道模式。
 - Backfill 调度、公平份额/计费、抢占。
-- Web 控制台；HA（多 server + PG + leader 选举）。
 - RBAC、审计、密钥后端集成。
+- *可选（规模增长后再做）*：Web 控制台；PostgreSQL + HA（多 server + leader 选举）。
 
-## 待确认事项（影响选型与优先级）
+## 已确认决策（2026-06）
 
-| 问题 | 影响 | 默认假设 |
+| 决策 | 选择 | 影响 |
 | --- | --- | --- |
-| 语言选型？ | 全局 | **Go**（单二进制 + SSH/gRPC/监控生态） |
-| 集群规模？（个位数 vs 上百节点） | 存储/调度复杂度 | 先 SQLite 单机，预留 PG |
-| GPU/NPU 厂商范围？ | 采集器优先级 | NVIDIA 优先，昇腾 NPU 次之 |
-| 需要 Web UI 吗？还是 CLI 优先？ | M5 取舍 | CLI 优先，Web 后期 |
-| 作业执行形态？（直接进程 vs 嵌套容器） | 执行器/隔离 | 进程 + cgroup，嵌套容器可选 |
-| 通知渠道优先级？（飞书/钉钉/企业微信/邮件） | M4 排序 | 飞书 + 邮件优先 |
+| 语言 | **Go** | 单二进制 + SSH/gRPC/监控生态 |
+| 集群规模 | **个位数节点（实验室）** | **SQLite 单机 server 为主路径**；HA/PG 降级为「按需后期」 |
+| 加速卡 | **NVIDIA GPU + 昇腾 NPU** | 采集器先 NVIDIA 后昇腾，均纳入早期里程碑（M1/M2） |
+| 交付优先 | **CLI 优先** | 主攻 `skctl`；Web 控制台移出主线，作为可选增强 |
 
-> 这些问题的答案会细化各里程碑的范围与顺序。建议先就「语言、规模、设备厂商、
-> 是否要 Web」四项达成一致，再进入 M0 编码。
+仍按默认推进、可随时调整：
+- **作业执行形态**：进程 + cgroup v2 隔离；嵌套容器作为可选强隔离。
+- **通知渠道优先级**：飞书 + 邮件优先，钉钉/企业微信/webhook/exec 跟进。

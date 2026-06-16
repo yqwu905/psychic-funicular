@@ -93,18 +93,21 @@ flowchart LR
 | [docs/DATA-MODEL.md](docs/DATA-MODEL.md) | 数据实体、表结构草案、API 接口、CLI 映射 |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | 分阶段里程碑（M0–M5） |
 
-## 技术选型（建议）
+## 技术选型（已确认）
 
-- **语言：Go**。单静态二进制易于塞进 Docker；`x/crypto/ssh`（SSH 隧道）、gRPC、
+- **语言：Go** ✅。单静态二进制易于塞进 Docker；`x/crypto/ssh`（SSH 隧道）、gRPC、
   `gopsutil`（CPU/内存/磁盘）、`go-nvml`（GPU）生态成熟；并发模型契合调度器与多节点通信。
-  > 备选：Rust（更强的性能/安全，生态稍薄）、Python（开发快但部署重、并发弱）。
+- **存储：SQLite 为主** ✅（面向实验室个位数节点的单机 server）；存储层接口化，
+  规模增长时可平滑切换 **PostgreSQL**，HA 留作按需后期。
+- **加速卡：NVIDIA GPU + 昇腾 NPU** ✅（先 NVIDIA 后昇腾，均为早期目标）。
+- **交付：CLI 优先** ✅（主攻 `skctl`，Web 控制台作为可选增强）。
 - **通信：gRPC**（控制面 RPC）+ **grpc-gateway**（REST）+ **protobuf**（接口契约）。
-- **存储：PostgreSQL**（生产）/ **SQLite**（单机与开发）。
 - **指标：内置轻量存储**，同时暴露 **Prometheus** 端点以对接现有 Grafana 生态。
 
-> 选型尚未锁定，详见 ROADMAP 的「待确认事项」。
+> 决策记录见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
 ## 当前状态
 
-🚧 设计阶段。本仓库目前只包含设计文档，尚未开始编码。下一步见
+🚧 设计阶段，核心选型已确认（Go / SQLite 单机 / NVIDIA+昇腾 / CLI 优先）。
+本仓库目前只包含设计文档。下一步进入 **M0 骨架**搭建，详见
 [docs/ROADMAP.md](docs/ROADMAP.md)。
