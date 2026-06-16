@@ -8,8 +8,10 @@ services:
       target: server
     ports:
       - "7443:7443"
+      - "8080:8080"   # Web 控制台 http://localhost:8080
     environment:
       SKIPPER_LISTEN_GRPC: ":7443"
+      SKIPPER_WEB_HTTP: ":8080"
       SKIPPER_STORE_DSN: "/data/skipper.db"
       SKIPPER_LOG_LEVEL: "info"
     volumes:

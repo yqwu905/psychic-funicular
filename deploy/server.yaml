@@ -6,6 +6,8 @@ store:
   dsn: "skipper.db"
 metrics:
   http: ":9100"         # Prometheus 端点(/metrics)；留空则不启用
+web:
+  http: ":8080"         # Web 控制台 + JSON API(/api/v1)；留空则不启用
 scheduler:
   interval: "2s"        # 调度循环周期
   backfill: true        # EASY backfill 回填(防大作业饿死 + 短作业填空隙)

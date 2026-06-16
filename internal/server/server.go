@@ -69,6 +69,7 @@ func (s *Server) Run(ctx context.Context) error {
 
 	go s.reapLoop(ctx)
 	stopHTTP := s.startMetricsHTTP()
+	stopWeb := s.startWebHTTP(jobLogs)
 
 	// ctx 取消时优雅停机。
 	go func() {
@@ -76,6 +77,9 @@ func (s *Server) Run(ctx context.Context) error {
 		s.log.Info("shutting down")
 		if stopHTTP != nil {
 			stopHTTP()
+		}
+		if stopWeb != nil {
+			stopWeb()
 		}
 		s.grpc.GracefulStop()
 	}()
@@ -108,6 +112,27 @@ func (s *Server) startMetricsHTTP() func() {
 		s.log.Info("metrics http serving", "addr", s.cfg.Metrics.HTTP, "path", "/metrics")
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			s.log.Error("metrics http exited", "err", err)
+		}
+	}()
+	return func() {
+		shutCtx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+		_ = srv.Shutdown(shutCtx)
+	}
+}
+
+// startWebHTTP 在配置了地址时启动 Web 控制台（内嵌 SPA + JSON API）。
+// 返回一个关闭函数（未启用时为 nil）。
+func (s *Server) startWebHTTP(jobLogs *jobLogStore) func() {
+	if s.cfg.Web.HTTP == "" {
+		return nil
+	}
+	ws := &webServer{store: s.store, metrics: s.metrics, jobLogs: jobLogs, log: s.log}
+	srv := &http.Server{Addr: s.cfg.Web.HTTP, Handler: ws.handler()}
+	go func() {
+		s.log.Info("web console serving", "addr", s.cfg.Web.HTTP)
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			s.log.Error("web http exited", "err", err)
 		}
 	}()
 	return func() {

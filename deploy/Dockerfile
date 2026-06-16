@@ -12,7 +12,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -o /out/ ./cmd/...
 
 FROM gcr.io/distroless/static-debian12 AS server
 COPY --from=build /out/skipper-server /usr/local/bin/skipper-server
-EXPOSE 7443
+EXPOSE 7443 8080
 ENTRYPOINT ["/usr/local/bin/skipper-server"]
 
 FROM gcr.io/distroless/static-debian12 AS agent

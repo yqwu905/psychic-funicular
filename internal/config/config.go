@@ -97,6 +97,9 @@ type ServerConfig struct {
 	Metrics struct {
 		HTTP string `yaml:"http"` // Prometheus 端点监听地址；空则不启用
 	} `yaml:"metrics"`
+	Web struct {
+		HTTP string `yaml:"http"` // Web 控制台 + JSON API 监听地址；空则不启用
+	} `yaml:"web"`
 	Scheduler struct {
 		Interval  Duration `yaml:"interval"`   // 调度循环周期
 		Backfill  bool     `yaml:"backfill"`   // EASY backfill 回填(默认开)
@@ -123,6 +126,7 @@ func DefaultServer() ServerConfig {
 	c.Store.Driver = "sqlite"
 	c.Store.DSN = "skipper.db"
 	c.Metrics.HTTP = ":9100"
+	c.Web.HTTP = ":8080"
 	c.Scheduler.Interval = Duration(2 * time.Second)
 	c.Scheduler.Backfill = true
 	c.Jobs.LogsDir = "job-logs"
@@ -157,6 +161,9 @@ func LoadServer(path string) (ServerConfig, error) {
 	}
 	if v := os.Getenv("SKIPPER_METRICS_HTTP"); v != "" {
 		c.Metrics.HTTP = v
+	}
+	if v := os.Getenv("SKIPPER_WEB_HTTP"); v != "" {
+		c.Web.HTTP = v
 	}
 	if v := os.Getenv("SKIPPER_JOBS_LOGS_DIR"); v != "" {
 		c.Jobs.LogsDir = v

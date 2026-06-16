@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Skipper 控制台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{ --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;height:100%}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;color:#1A2233;background:#F6F8FA;-webkit-font-smoothing:antialiased}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+    input,select,textarea{font-family:inherit}
+    a{color:inherit;text-decoration:none}
+    ::-webkit-scrollbar{width:10px;height:10px}
+    ::-webkit-scrollbar-thumb{background:#D5DCE6;border-radius:6px;border:2px solid #F6F8FA}
+    ::-webkit-scrollbar-thumb:hover{background:#C2CBD9}
+    @keyframes skp-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+    @keyframes skp-spin{to{transform:rotate(360deg)}}
+    @keyframes skp-shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+    @keyframes skp-blink{0%,100%{opacity:1}50%{opacity:.25}}
+    .skp-spin{animation:skp-spin 1s linear infinite}
+    .skp-skel{background:linear-gradient(90deg,#EDF1F5 25%,#F4F7FA 37%,#EDF1F5 63%);background-size:800px 100%;animation:skp-shimmer 1.4s infinite linear;border-radius:6px}
+    .skp-row:hover{background:#F7F9FC!important}
+    .skp-nav:hover{background:#EEF2F8!important}
+    .skp-card-h{transition:box-shadow .15s,border-color .15s}
+    .skp-card-h:hover{box-shadow:0 4px 12px rgba(16,24,40,.08)!important;border-color:#D5DEEC!important}
+    .mono{font-family:var(--mono)}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:#2563EB!important;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script src="app.js"></script>
+</body>
+</html>

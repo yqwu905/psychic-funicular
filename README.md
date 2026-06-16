@@ -81,12 +81,12 @@ flowchart LR
 │   ├── scheduler/           # ✅ FIFO+优先级调度（纯函数 Plan + 调度循环）
 │   ├── transport/           # ✅ SSH 反向隧道（仅开放 SSH 端口的容器，端口不限 22）
 │   ├── notify/              # ✅ 事件引擎 + 检测器 + 可插拔通知器接口
-│   └── event/               # ✅ 事件/通知数据模型
+│   ├── event/               # ✅ 事件/通知数据模型
+│   └── webui/               # ✅ Web 控制台（内嵌 SPA + JSON API 静态资源）
 ├── api/proto/               # ✅ .proto 接口契约
 ├── gen/                     # ✅ 生成的 gRPC 代码（已提交）
 ├── deploy/                  # ✅ 示例配置、Dockerfile、docker-compose
-├── docs/                    # ✅ 设计文档（见下）
-└── web/                     #    Web 控制台（可选，后期）
+└── docs/                    # ✅ 设计文档（见下）
 ```
 
 ## 设计文档
@@ -147,7 +147,18 @@ make build            # 或 go build -o bin/ ./cmd/...
 
 # 7) Prometheus 指标端点
 curl -s localhost:9100/metrics | grep '^skipper_'
+
+# 8) Web 控制台（默认 :8080，单二进制内嵌，无需单独部署前端）
+#    浏览器打开 http://localhost:8080
+#    概览 / 节点 / 设备 GPU-NPU / 作业队列 / 提交 / 事件 / 通知，
+#    以及只读 JSON API（与 gRPC 共享同一份状态）：
+curl -s localhost:8080/api/v1/nodes        # 节点 + 最新指标快照(含设备)
+curl -s localhost:8080/api/v1/jobs         # 作业队列
+curl -s localhost:8080/api/v1/events       # 事件流
 ```
+
+> Web 控制台是纯静态 SPA（无构建步骤），通过 `//go:embed` 随 `skipper-server`
+> 一起分发；配置 `web.http`（或环境变量 `SKIPPER_WEB_HTTP`）即可启用，留空则关闭。
 
 修改 `.proto` 后用 `make tools`（首次）+ `make proto` 重新生成 gRPC 代码。
 容器化：`docker compose -f deploy/docker-compose.yml up --build`。
@@ -166,5 +177,9 @@ curl -s localhost:9100/metrics | grep '^skipper_'
 
 ✅ **M5.1 调度增强**：EASY backfill 回填（防饿死 + 填空隙）、`gpu_type` 真匹配、优先级老化。
 
-🚧 后续 **M5**（公平份额、抢占、RBAC、NPU 实机、cgroup 硬限额、Web/HA），详见
+✅ **Web 控制台**：单二进制内嵌的轻量 SPA + 只读 JSON API（`/api/v1`）——概览大盘、
+节点 / 设备（GPU/NPU，快速找空卡、抓「占着不用」）、作业队列与详情（生命周期 + 实时日志）、
+表单化提交、事件流与通知记录；列表四态（加载 / 空 / 错误 / 正常）、自动刷新、节点/设备/事件抽屉。
+
+🚧 后续 **M5**（公平份额、抢占、RBAC、NPU 实机、cgroup 硬限额、登录鉴权 / HA），详见
 [docs/ROADMAP.md](docs/ROADMAP.md)。
