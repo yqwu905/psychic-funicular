@@ -59,6 +59,7 @@ func ResourcesFromSnapshot(snap *skipperv1.MetricsSnapshot) *skipperv1.Resources
 			Index:         d.GetIndex(),
 			Uuid:          d.GetUuid(),
 			MemTotalBytes: d.GetMemTotalBytes(),
+			Name:          d.GetName(),
 		})
 	}
 	return r

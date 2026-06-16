@@ -24,6 +24,7 @@ type Device struct {
 	Index         uint32 `json:"index"`
 	UUID          string `json:"uuid"`
 	MemTotalBytes uint64 `json:"mem_total_bytes"`
+	Name          string `json:"name"` // 设备型号，用于 gpu_type 匹配
 }
 
 // Node 是一个计算节点的持久化视图。

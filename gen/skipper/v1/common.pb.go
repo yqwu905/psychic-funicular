@@ -29,6 +29,7 @@ type Device struct {
 	Index         uint32                 `protobuf:"varint,3,opt,name=index,proto3" json:"index,omitempty"`  // 设备序号
 	Uuid          string                 `protobuf:"bytes,4,opt,name=uuid,proto3" json:"uuid,omitempty"`
 	MemTotalBytes uint64                 `protobuf:"varint,5,opt,name=mem_total_bytes,json=memTotalBytes,proto3" json:"mem_total_bytes,omitempty"`
+	Name          string                 `protobuf:"bytes,6,opt,name=name,proto3" json:"name,omitempty"` // 设备型号(如 "NVIDIA A100-SXM4-40GB")，用于 gpu_type 匹配
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -96,6 +97,13 @@ func (x *Device) GetMemTotalBytes() uint64 {
 		return x.MemTotalBytes
 	}
 	return 0
+}
+
+func (x *Device) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
 }
 
 // 节点的资源清单。
@@ -273,13 +281,14 @@ var File_skipper_v1_common_proto protoreflect.FileDescriptor
 const file_skipper_v1_common_proto_rawDesc = "" +
 	"\n" +
 	"\x17skipper/v1/common.proto\x12\n" +
-	"skipper.v1\"\x86\x01\n" +
+	"skipper.v1\"\x9a\x01\n" +
 	"\x06Device\x12\x12\n" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x16\n" +
 	"\x06vendor\x18\x02 \x01(\tR\x06vendor\x12\x14\n" +
 	"\x05index\x18\x03 \x01(\rR\x05index\x12\x12\n" +
 	"\x04uuid\x18\x04 \x01(\tR\x04uuid\x12&\n" +
-	"\x0fmem_total_bytes\x18\x05 \x01(\x04R\rmemTotalBytes\"u\n" +
+	"\x0fmem_total_bytes\x18\x05 \x01(\x04R\rmemTotalBytes\x12\x12\n" +
+	"\x04name\x18\x06 \x01(\tR\x04name\"u\n" +
 	"\tResources\x12\x12\n" +
 	"\x04cpus\x18\x01 \x01(\rR\x04cpus\x12&\n" +
 	"\x0fmem_total_bytes\x18\x02 \x01(\x04R\rmemTotalBytes\x12,\n" +

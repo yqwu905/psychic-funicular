@@ -8,6 +8,8 @@ metrics:
   http: ":9100"         # Prometheus 端点(/metrics)；留空则不启用
 scheduler:
   interval: "2s"        # 调度循环周期
+  backfill: true        # EASY backfill 回填(防大作业饿死 + 短作业填空隙)
+  age_weight: 0.0       # 排队每分钟增加的优先级(0=关闭老化)
 jobs:
   logs_dir: "job-logs"  # 作业日志存储目录
 notify:

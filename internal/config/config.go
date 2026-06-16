@@ -98,7 +98,9 @@ type ServerConfig struct {
 		HTTP string `yaml:"http"` // Prometheus 端点监听地址；空则不启用
 	} `yaml:"metrics"`
 	Scheduler struct {
-		Interval Duration `yaml:"interval"` // 调度循环周期
+		Interval  Duration `yaml:"interval"`   // 调度循环周期
+		Backfill  bool     `yaml:"backfill"`   // EASY backfill 回填(默认开)
+		AgeWeight float64  `yaml:"age_weight"` // 排队每分钟增加的优先级(默认 0=关闭)
 	} `yaml:"scheduler"`
 	Jobs struct {
 		LogsDir string `yaml:"logs_dir"` // 作业日志存储目录
@@ -122,6 +124,7 @@ func DefaultServer() ServerConfig {
 	c.Store.DSN = "skipper.db"
 	c.Metrics.HTTP = ":9100"
 	c.Scheduler.Interval = Duration(2 * time.Second)
+	c.Scheduler.Backfill = true
 	c.Jobs.LogsDir = "job-logs"
 	c.Notify.Channels = []string{"log"}
 	c.Notify.Detector.Interval = Duration(15 * time.Second)

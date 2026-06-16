@@ -46,10 +46,18 @@
 - ✅ **已演示**：disk.full 触达 admins、job.completed 触达提交者(`${owner}`)。
 - ⏭ 用户联系方式/偏好、`skctl notify test`、真实渠道实现列为后续/使用方侧。
 
-### M5 — 增强与硬化（按需）
-- 昇腾 NPU 调度（`ASCEND_RT_VISIBLE_DEVICES` 分配）；反向隧道模式。
-- Backfill 调度、公平份额/计费、抢占。
+### M5 — 增强与硬化（持续推进）
+
+**M5.1 调度增强 ✅（已完成）**
+- ✅ EASY backfill 回填（单预留：防大作业饿死 + 短作业填空隙；含单测 + 端到端演示）。
+- ✅ `gpu_type` 真匹配（节点库存带设备型号，按型号挑卡）。
+- ✅ 多因子优先级·老化（排队时长加权，`scheduler.age_weight` 可配）。
+
+**后续（按需）**
+- 昇腾 NPU 实机调度（`ASCEND_RT_VISIBLE_DEVICES` 已就绪，待真机验证）；反向隧道模式。
+- 公平份额/计费、抢占（QOS）。
 - RBAC、审计、密钥后端集成。
+- cgroup v2 CPU/内存硬限额。
 - *可选（规模增长后再做）*：Web 控制台；PostgreSQL + HA（多 server + leader 选举）。
 
 ## 已确认决策（2026-06）

@@ -58,7 +58,8 @@ func (s *Server) Run(ctx context.Context) error {
 	skipperv1.RegisterAgentServiceServer(s.grpc, &agentService{store: s.store, metricsStore: s.metrics, jobLogs: jobLogs, events: s.events, log: s.log})
 	skipperv1.RegisterClusterServiceServer(s.grpc, &clusterService{store: s.store, metricsStore: s.metrics, jobLogs: jobLogs, log: s.log})
 
-	sched := scheduler.New(s.store, s.log, s.cfg.Scheduler.Interval.Std())
+	sched := scheduler.New(s.store, s.log, s.cfg.Scheduler.Interval.Std(),
+		scheduler.Policy{Backfill: s.cfg.Scheduler.Backfill, AgeWeight: s.cfg.Scheduler.AgeWeight})
 	go sched.Run(ctx)
 
 	detector := notify.NewDetector(s.store, s.metrics, s.events, s.cfg.Notify, s.log)

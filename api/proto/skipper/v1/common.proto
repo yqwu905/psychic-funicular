@@ -11,6 +11,7 @@ message Device {
   uint32 index = 3;            // 设备序号
   string uuid = 4;
   uint64 mem_total_bytes = 5;
+  string name = 6;             // 设备型号(如 "NVIDIA A100-SXM4-40GB")，用于 gpu_type 匹配
 }
 
 // 节点的资源清单。

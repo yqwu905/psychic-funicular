@@ -20,6 +20,7 @@ func resourcesFromProto(n *store.Node, r *skipperv1.Resources) {
 			Index:         d.GetIndex(),
 			UUID:          d.GetUuid(),
 			MemTotalBytes: d.GetMemTotalBytes(),
+			Name:          d.GetName(),
 		})
 	}
 }
@@ -42,6 +43,7 @@ func nodeFromSnapshot(n *store.Node, snap *skipperv1.MetricsSnapshot) {
 			Index:         d.GetIndex(),
 			UUID:          d.GetUuid(),
 			MemTotalBytes: d.GetMemTotalBytes(),
+			Name:          d.GetName(),
 		})
 	}
 }
@@ -56,6 +58,7 @@ func nodeToProto(n *store.Node) *skipperv1.Node {
 			Index:         d.Index,
 			Uuid:          d.UUID,
 			MemTotalBytes: d.MemTotalBytes,
+			Name:          d.Name,
 		})
 	}
 	var hb int64

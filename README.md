@@ -164,5 +164,7 @@ curl -s localhost:9100/metrics | grep '^skipper_'
 - **M4**（⑤通知）：事件引擎 + 检测器 + 规则路由 + **可插拔通知器接口**，覆盖硬盘满 / 设备空置
   （区分已分配/空闲）/ 任务结束 / 节点失联；去重/冷却；`skctl events/notifications`。
 
-🚧 后续增强见 **M5**（NPU 调度、Backfill、公平份额、cgroup 硬限额、Web/HA），详见
+✅ **M5.1 调度增强**：EASY backfill 回填（防饿死 + 填空隙）、`gpu_type` 真匹配、优先级老化。
+
+🚧 后续 **M5**（公平份额、抢占、RBAC、NPU 实机、cgroup 硬限额、Web/HA），详见
 [docs/ROADMAP.md](docs/ROADMAP.md)。
