@@ -47,7 +47,7 @@ func OpenSQLite(dsn string) (Store, error) {
 			return nil, fmt.Errorf("pragma %q: %w", p, err)
 		}
 	}
-	for _, s := range []string{schema, jobSchema} {
+	for _, s := range []string{schema, jobSchema, eventSchema} {
 		if _, err := db.Exec(s); err != nil {
 			_ = db.Close()
 			return nil, fmt.Errorf("migrate: %w", err)

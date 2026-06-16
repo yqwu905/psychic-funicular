@@ -689,12 +689,188 @@ func (x *GetJobLogsRequest) GetFollow() bool {
 	return false
 }
 
+type ListEventsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEventsRequest) Reset() {
+	*x = ListEventsRequest{}
+	mi := &file_skipper_v1_cluster_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEventsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEventsRequest) ProtoMessage() {}
+
+func (x *ListEventsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_cluster_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEventsRequest.ProtoReflect.Descriptor instead.
+func (*ListEventsRequest) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_cluster_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ListEventsRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type ListEventsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Events        []*Event               `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEventsResponse) Reset() {
+	*x = ListEventsResponse{}
+	mi := &file_skipper_v1_cluster_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEventsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEventsResponse) ProtoMessage() {}
+
+func (x *ListEventsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_cluster_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEventsResponse.ProtoReflect.Descriptor instead.
+func (*ListEventsResponse) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_cluster_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *ListEventsResponse) GetEvents() []*Event {
+	if x != nil {
+		return x.Events
+	}
+	return nil
+}
+
+type ListNotificationsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListNotificationsRequest) Reset() {
+	*x = ListNotificationsRequest{}
+	mi := &file_skipper_v1_cluster_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListNotificationsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListNotificationsRequest) ProtoMessage() {}
+
+func (x *ListNotificationsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_cluster_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListNotificationsRequest.ProtoReflect.Descriptor instead.
+func (*ListNotificationsRequest) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_cluster_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *ListNotificationsRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type ListNotificationsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Notifications []*Notification        `protobuf:"bytes,1,rep,name=notifications,proto3" json:"notifications,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListNotificationsResponse) Reset() {
+	*x = ListNotificationsResponse{}
+	mi := &file_skipper_v1_cluster_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListNotificationsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListNotificationsResponse) ProtoMessage() {}
+
+func (x *ListNotificationsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_skipper_v1_cluster_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListNotificationsResponse.ProtoReflect.Descriptor instead.
+func (*ListNotificationsResponse) Descriptor() ([]byte, []int) {
+	return file_skipper_v1_cluster_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *ListNotificationsResponse) GetNotifications() []*Notification {
+	if x != nil {
+		return x.Notifications
+	}
+	return nil
+}
+
 var File_skipper_v1_cluster_proto protoreflect.FileDescriptor
 
 const file_skipper_v1_cluster_proto_rawDesc = "" +
 	"\n" +
 	"\x18skipper/v1/cluster.proto\x12\n" +
-	"skipper.v1\x1a\x17skipper/v1/common.proto\x1a\x18skipper/v1/metrics.proto\x1a\x14skipper/v1/job.proto\"\x12\n" +
+	"skipper.v1\x1a\x17skipper/v1/common.proto\x1a\x18skipper/v1/metrics.proto\x1a\x14skipper/v1/job.proto\x1a\x17skipper/v1/events.proto\"\x12\n" +
 	"\x10ListNodesRequest\";\n" +
 	"\x11ListNodesResponse\x12&\n" +
 	"\x05nodes\x18\x01 \x03(\v2\x10.skipper.v1.NodeR\x05nodes\"\xb0\x01\n" +
@@ -735,7 +911,15 @@ const file_skipper_v1_cluster_proto_rawDesc = "" +
 	"\x05state\x18\x02 \x01(\tR\x05state\"B\n" +
 	"\x11GetJobLogsRequest\x12\x15\n" +
 	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x16\n" +
-	"\x06follow\x18\x02 \x01(\bR\x06follow2\x80\x04\n" +
+	"\x06follow\x18\x02 \x01(\bR\x06follow\")\n" +
+	"\x11ListEventsRequest\x12\x14\n" +
+	"\x05limit\x18\x01 \x01(\x05R\x05limit\"?\n" +
+	"\x12ListEventsResponse\x12)\n" +
+	"\x06events\x18\x01 \x03(\v2\x11.skipper.v1.EventR\x06events\"0\n" +
+	"\x18ListNotificationsRequest\x12\x14\n" +
+	"\x05limit\x18\x01 \x01(\x05R\x05limit\"[\n" +
+	"\x19ListNotificationsResponse\x12>\n" +
+	"\rnotifications\x18\x01 \x03(\v2\x18.skipper.v1.NotificationR\rnotifications2\xaf\x05\n" +
 	"\x0eClusterService\x12H\n" +
 	"\tListNodes\x12\x1c.skipper.v1.ListNodesRequest\x1a\x1d.skipper.v1.ListNodesResponse\x12N\n" +
 	"\vListMetrics\x12\x1e.skipper.v1.ListMetricsRequest\x1a\x1f.skipper.v1.ListMetricsResponse\x12H\n" +
@@ -744,7 +928,10 @@ const file_skipper_v1_cluster_proto_rawDesc = "" +
 	"\x06GetJob\x12\x19.skipper.v1.GetJobRequest\x1a\x0f.skipper.v1.Job\x12H\n" +
 	"\tCancelJob\x12\x1c.skipper.v1.CancelJobRequest\x1a\x1d.skipper.v1.CancelJobResponse\x12C\n" +
 	"\n" +
-	"GetJobLogs\x12\x1d.skipper.v1.GetJobLogsRequest\x1a\x14.skipper.v1.LogChunk0\x01B?Z=github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1b\x06proto3"
+	"GetJobLogs\x12\x1d.skipper.v1.GetJobLogsRequest\x1a\x14.skipper.v1.LogChunk0\x01\x12K\n" +
+	"\n" +
+	"ListEvents\x12\x1d.skipper.v1.ListEventsRequest\x1a\x1e.skipper.v1.ListEventsResponse\x12`\n" +
+	"\x11ListNotifications\x12$.skipper.v1.ListNotificationsRequest\x1a%.skipper.v1.ListNotificationsResponseB?Z=github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1b\x06proto3"
 
 var (
 	file_skipper_v1_cluster_proto_rawDescOnce sync.Once
@@ -758,54 +945,66 @@ func file_skipper_v1_cluster_proto_rawDescGZIP() []byte {
 	return file_skipper_v1_cluster_proto_rawDescData
 }
 
-var file_skipper_v1_cluster_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_skipper_v1_cluster_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_skipper_v1_cluster_proto_goTypes = []any{
-	(*ListNodesRequest)(nil),    // 0: skipper.v1.ListNodesRequest
-	(*ListNodesResponse)(nil),   // 1: skipper.v1.ListNodesResponse
-	(*NodeMetrics)(nil),         // 2: skipper.v1.NodeMetrics
-	(*ListMetricsRequest)(nil),  // 3: skipper.v1.ListMetricsRequest
-	(*ListMetricsResponse)(nil), // 4: skipper.v1.ListMetricsResponse
-	(*SubmitJobRequest)(nil),    // 5: skipper.v1.SubmitJobRequest
-	(*SubmitJobResponse)(nil),   // 6: skipper.v1.SubmitJobResponse
-	(*ListJobsRequest)(nil),     // 7: skipper.v1.ListJobsRequest
-	(*ListJobsResponse)(nil),    // 8: skipper.v1.ListJobsResponse
-	(*GetJobRequest)(nil),       // 9: skipper.v1.GetJobRequest
-	(*CancelJobRequest)(nil),    // 10: skipper.v1.CancelJobRequest
-	(*CancelJobResponse)(nil),   // 11: skipper.v1.CancelJobResponse
-	(*GetJobLogsRequest)(nil),   // 12: skipper.v1.GetJobLogsRequest
-	nil,                         // 13: skipper.v1.SubmitJobRequest.EnvEntry
-	(*Node)(nil),                // 14: skipper.v1.Node
-	(*MetricsSnapshot)(nil),     // 15: skipper.v1.MetricsSnapshot
-	(*ResourceRequest)(nil),     // 16: skipper.v1.ResourceRequest
-	(*Job)(nil),                 // 17: skipper.v1.Job
-	(*LogChunk)(nil),            // 18: skipper.v1.LogChunk
+	(*ListNodesRequest)(nil),          // 0: skipper.v1.ListNodesRequest
+	(*ListNodesResponse)(nil),         // 1: skipper.v1.ListNodesResponse
+	(*NodeMetrics)(nil),               // 2: skipper.v1.NodeMetrics
+	(*ListMetricsRequest)(nil),        // 3: skipper.v1.ListMetricsRequest
+	(*ListMetricsResponse)(nil),       // 4: skipper.v1.ListMetricsResponse
+	(*SubmitJobRequest)(nil),          // 5: skipper.v1.SubmitJobRequest
+	(*SubmitJobResponse)(nil),         // 6: skipper.v1.SubmitJobResponse
+	(*ListJobsRequest)(nil),           // 7: skipper.v1.ListJobsRequest
+	(*ListJobsResponse)(nil),          // 8: skipper.v1.ListJobsResponse
+	(*GetJobRequest)(nil),             // 9: skipper.v1.GetJobRequest
+	(*CancelJobRequest)(nil),          // 10: skipper.v1.CancelJobRequest
+	(*CancelJobResponse)(nil),         // 11: skipper.v1.CancelJobResponse
+	(*GetJobLogsRequest)(nil),         // 12: skipper.v1.GetJobLogsRequest
+	(*ListEventsRequest)(nil),         // 13: skipper.v1.ListEventsRequest
+	(*ListEventsResponse)(nil),        // 14: skipper.v1.ListEventsResponse
+	(*ListNotificationsRequest)(nil),  // 15: skipper.v1.ListNotificationsRequest
+	(*ListNotificationsResponse)(nil), // 16: skipper.v1.ListNotificationsResponse
+	nil,                               // 17: skipper.v1.SubmitJobRequest.EnvEntry
+	(*Node)(nil),                      // 18: skipper.v1.Node
+	(*MetricsSnapshot)(nil),           // 19: skipper.v1.MetricsSnapshot
+	(*ResourceRequest)(nil),           // 20: skipper.v1.ResourceRequest
+	(*Job)(nil),                       // 21: skipper.v1.Job
+	(*Event)(nil),                     // 22: skipper.v1.Event
+	(*Notification)(nil),              // 23: skipper.v1.Notification
+	(*LogChunk)(nil),                  // 24: skipper.v1.LogChunk
 }
 var file_skipper_v1_cluster_proto_depIdxs = []int32{
-	14, // 0: skipper.v1.ListNodesResponse.nodes:type_name -> skipper.v1.Node
-	15, // 1: skipper.v1.NodeMetrics.snapshot:type_name -> skipper.v1.MetricsSnapshot
+	18, // 0: skipper.v1.ListNodesResponse.nodes:type_name -> skipper.v1.Node
+	19, // 1: skipper.v1.NodeMetrics.snapshot:type_name -> skipper.v1.MetricsSnapshot
 	2,  // 2: skipper.v1.ListMetricsResponse.nodes:type_name -> skipper.v1.NodeMetrics
-	13, // 3: skipper.v1.SubmitJobRequest.env:type_name -> skipper.v1.SubmitJobRequest.EnvEntry
-	16, // 4: skipper.v1.SubmitJobRequest.request:type_name -> skipper.v1.ResourceRequest
-	17, // 5: skipper.v1.ListJobsResponse.jobs:type_name -> skipper.v1.Job
-	0,  // 6: skipper.v1.ClusterService.ListNodes:input_type -> skipper.v1.ListNodesRequest
-	3,  // 7: skipper.v1.ClusterService.ListMetrics:input_type -> skipper.v1.ListMetricsRequest
-	5,  // 8: skipper.v1.ClusterService.SubmitJob:input_type -> skipper.v1.SubmitJobRequest
-	7,  // 9: skipper.v1.ClusterService.ListJobs:input_type -> skipper.v1.ListJobsRequest
-	9,  // 10: skipper.v1.ClusterService.GetJob:input_type -> skipper.v1.GetJobRequest
-	10, // 11: skipper.v1.ClusterService.CancelJob:input_type -> skipper.v1.CancelJobRequest
-	12, // 12: skipper.v1.ClusterService.GetJobLogs:input_type -> skipper.v1.GetJobLogsRequest
-	1,  // 13: skipper.v1.ClusterService.ListNodes:output_type -> skipper.v1.ListNodesResponse
-	4,  // 14: skipper.v1.ClusterService.ListMetrics:output_type -> skipper.v1.ListMetricsResponse
-	6,  // 15: skipper.v1.ClusterService.SubmitJob:output_type -> skipper.v1.SubmitJobResponse
-	8,  // 16: skipper.v1.ClusterService.ListJobs:output_type -> skipper.v1.ListJobsResponse
-	17, // 17: skipper.v1.ClusterService.GetJob:output_type -> skipper.v1.Job
-	11, // 18: skipper.v1.ClusterService.CancelJob:output_type -> skipper.v1.CancelJobResponse
-	18, // 19: skipper.v1.ClusterService.GetJobLogs:output_type -> skipper.v1.LogChunk
-	13, // [13:20] is the sub-list for method output_type
-	6,  // [6:13] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	17, // 3: skipper.v1.SubmitJobRequest.env:type_name -> skipper.v1.SubmitJobRequest.EnvEntry
+	20, // 4: skipper.v1.SubmitJobRequest.request:type_name -> skipper.v1.ResourceRequest
+	21, // 5: skipper.v1.ListJobsResponse.jobs:type_name -> skipper.v1.Job
+	22, // 6: skipper.v1.ListEventsResponse.events:type_name -> skipper.v1.Event
+	23, // 7: skipper.v1.ListNotificationsResponse.notifications:type_name -> skipper.v1.Notification
+	0,  // 8: skipper.v1.ClusterService.ListNodes:input_type -> skipper.v1.ListNodesRequest
+	3,  // 9: skipper.v1.ClusterService.ListMetrics:input_type -> skipper.v1.ListMetricsRequest
+	5,  // 10: skipper.v1.ClusterService.SubmitJob:input_type -> skipper.v1.SubmitJobRequest
+	7,  // 11: skipper.v1.ClusterService.ListJobs:input_type -> skipper.v1.ListJobsRequest
+	9,  // 12: skipper.v1.ClusterService.GetJob:input_type -> skipper.v1.GetJobRequest
+	10, // 13: skipper.v1.ClusterService.CancelJob:input_type -> skipper.v1.CancelJobRequest
+	12, // 14: skipper.v1.ClusterService.GetJobLogs:input_type -> skipper.v1.GetJobLogsRequest
+	13, // 15: skipper.v1.ClusterService.ListEvents:input_type -> skipper.v1.ListEventsRequest
+	15, // 16: skipper.v1.ClusterService.ListNotifications:input_type -> skipper.v1.ListNotificationsRequest
+	1,  // 17: skipper.v1.ClusterService.ListNodes:output_type -> skipper.v1.ListNodesResponse
+	4,  // 18: skipper.v1.ClusterService.ListMetrics:output_type -> skipper.v1.ListMetricsResponse
+	6,  // 19: skipper.v1.ClusterService.SubmitJob:output_type -> skipper.v1.SubmitJobResponse
+	8,  // 20: skipper.v1.ClusterService.ListJobs:output_type -> skipper.v1.ListJobsResponse
+	21, // 21: skipper.v1.ClusterService.GetJob:output_type -> skipper.v1.Job
+	11, // 22: skipper.v1.ClusterService.CancelJob:output_type -> skipper.v1.CancelJobResponse
+	24, // 23: skipper.v1.ClusterService.GetJobLogs:output_type -> skipper.v1.LogChunk
+	14, // 24: skipper.v1.ClusterService.ListEvents:output_type -> skipper.v1.ListEventsResponse
+	16, // 25: skipper.v1.ClusterService.ListNotifications:output_type -> skipper.v1.ListNotificationsResponse
+	17, // [17:26] is the sub-list for method output_type
+	8,  // [8:17] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_skipper_v1_cluster_proto_init() }
@@ -816,13 +1015,14 @@ func file_skipper_v1_cluster_proto_init() {
 	file_skipper_v1_common_proto_init()
 	file_skipper_v1_metrics_proto_init()
 	file_skipper_v1_job_proto_init()
+	file_skipper_v1_events_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_skipper_v1_cluster_proto_rawDesc), len(file_skipper_v1_cluster_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

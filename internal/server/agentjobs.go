@@ -2,9 +2,11 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	skipperv1 "github.com/yqwu905/psychic-funicular/gen/skipper/v1"
+	"github.com/yqwu905/psychic-funicular/internal/event"
 	"github.com/yqwu905/psychic-funicular/internal/store"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -55,12 +57,41 @@ func (s *agentService) UpdateJobStatus(ctx context.Context, req *skipperv1.Updat
 		if err := s.store.FinishJob(ctx, req.GetJobId(), req.GetState(), req.GetExitCode(), req.GetReason(), now); err != nil {
 			return nil, status.Error(codes.Internal, "finish job failed")
 		}
+		s.emitJobEvent(ctx, req.GetJobId(), req.GetState(), req.GetExitCode())
 	default:
 		return nil, status.Errorf(codes.InvalidArgument, "unknown state %q", req.GetState())
 	}
 	s.log.Info("job status", "job", req.GetJobId(), "state", req.GetState(),
 		"exit_code", req.GetExitCode(), "reason", req.GetReason())
 	return &skipperv1.UpdateJobStatusResponse{Ok: true}, nil
+}
+
+// emitJobEvent 在作业进入终态时发「任务结束」事件，通知提交者（CANCELLED 由用户主动，不通知）。
+func (s *agentService) emitJobEvent(ctx context.Context, jobID, state string, code int32) {
+	if state == store.JobCancelled {
+		return
+	}
+	j, err := s.store.GetJob(ctx, jobID)
+	if err != nil || j == nil {
+		return
+	}
+	typ, sev := event.TypeJobCompleted, event.SevInfo
+	if state != store.JobCompleted {
+		typ, sev = event.TypeJobFailed, event.SevWarning
+	}
+	name := j.Name
+	if name == "" {
+		name = jobID
+	}
+	s.events.Emit(ctx, event.Event{
+		Type: typ, Severity: sev, Source: jobID,
+		Summary:  fmt.Sprintf("作业 %s %s，退出码 %d", name, state, code),
+		DedupKey: "job|" + jobID,
+		Labels: map[string]string{
+			"job": jobID, "name": j.Name, "owner": j.Owner,
+			"node": j.NodeName, "state": state, "exit_code": fmt.Sprintf("%d", code),
+		},
+	})
 }
 
 func (s *agentService) AppendLogs(_ context.Context, req *skipperv1.AppendLogsRequest) (*skipperv1.AppendLogsResponse, error) {

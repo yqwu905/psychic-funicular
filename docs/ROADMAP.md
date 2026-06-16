@@ -37,12 +37,14 @@
   全链路走在一条 SSH 连接里。
 - ⏭ Agent 经 SSH 自举（推送二进制 + 远程启动）当前为手动步骤（`scp -P <port>` + 运行），自动化列为后续项。
 
-### M4 — 事件与通知
-- 事件引擎 + 规则路由 + 去重/冷却。
-- 通知器接口 + 注册/路由机制；接入内部通知器实现（框架不内置具体渠道）。
-- 三类必备事件：`disk.full`、`device.idle`（区分已分配/未分配）、`job.*`。
-- 用户联系方式/偏好；`skctl notify test`。
-- **可演示**：磁盘超阈值、GPU 空置、任务结束分别触达对应用户。
+### M4 — 事件与通知 ✅（已完成）
+- ✅ 事件引擎 + 规则路由 + 去重/冷却（含单测）；事件与通知均持久化、可查。
+- ✅ 通知器接口 + 注册机制 + 内置 log 默认 sink；真实渠道由使用方实现接口接入（框架不内置）。
+- ✅ 服务端检测器：`disk.full`/`disk.recovered`、`device.idle`（区分已分配→占用者 / 空闲→管理员）、
+  `job.completed`/`job.failed`、`node.down`。
+- ✅ 配置化规则（`${label}` 动态接收人）；`skctl events` / `skctl notifications`。
+- ✅ **已演示**：disk.full 触达 admins、job.completed 触达提交者(`${owner}`)。
+- ⏭ 用户联系方式/偏好、`skctl notify test`、真实渠道实现列为后续/使用方侧。
 
 ### M5 — 增强与硬化（按需）
 - 昇腾 NPU 调度（`ASCEND_RT_VISIBLE_DEVICES` 分配）；反向隧道模式。

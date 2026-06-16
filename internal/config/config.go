@@ -29,6 +29,52 @@ func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
 // Std 返回标准库 time.Duration。
 func (d Duration) Std() time.Duration { return time.Duration(d) }
 
+// StringOrSlice 接受 YAML 中的单个字符串或字符串列表。
+type StringOrSlice []string
+
+// UnmarshalYAML 同时支持 `type: x` 与 `type: [x, y]`。
+func (s *StringOrSlice) UnmarshalYAML(value *yaml.Node) error {
+	var one string
+	if err := value.Decode(&one); err == nil {
+		*s = []string{one}
+		return nil
+	}
+	var many []string
+	if err := value.Decode(&many); err != nil {
+		return err
+	}
+	*s = many
+	return nil
+}
+
+// RuleMatch 是事件匹配条件。
+type RuleMatch struct {
+	Type        StringOrSlice     `yaml:"type"`         // 事件类型(单值或列表)
+	Labels      map[string]string `yaml:"labels"`       // 标签需全部匹配
+	MinSeverity string            `yaml:"min_severity"` // 最低严重级别
+}
+
+// NotifyRule 是一条通知路由规则。
+type NotifyRule struct {
+	Name     string    `yaml:"name"`
+	Match    RuleMatch `yaml:"match"`
+	To       []string  `yaml:"to"`       // 接收人(静态名或 ${label} 动态解析)
+	Channels []string  `yaml:"channels"` // 通道名；空则用全局默认
+	Cooldown Duration  `yaml:"cooldown"` // 同一去重键的冷却时长
+}
+
+// NotifyConfig 是通知子系统配置。
+type NotifyConfig struct {
+	Channels []string `yaml:"channels"` // 默认启用的通知器名
+	Detector struct {
+		Interval           Duration `yaml:"interval"`
+		DiskThreshold      float64  `yaml:"disk_threshold"`       // 0-1，使用率阈值
+		DeviceIdleUtil     float64  `yaml:"device_idle_util"`     // 0-1，利用率低于此视为空闲
+		DeviceIdleDuration Duration `yaml:"device_idle_duration"` // 持续多久判定空置
+	} `yaml:"detector"`
+	Rules []NotifyRule `yaml:"rules"` // 为空则使用内置默认规则
+}
+
 // SSHNodeConfig 描述一个经 SSH 隧道纳管的节点（容器仅开放 SSH 端口的场景）。
 type SSHNodeConfig struct {
 	Name         string `yaml:"name"`          // 节点名(仅日志)
@@ -62,6 +108,7 @@ type ServerConfig struct {
 		ReapInterval Duration `yaml:"reap_interval"` // 巡检失联节点的周期
 	} `yaml:"heartbeat"`
 	SSHNodes []SSHNodeConfig `yaml:"ssh_nodes"` // 经 SSH 隧道纳管的节点列表
+	Notify   NotifyConfig    `yaml:"notify"`    // 事件与通知
 	Log      struct {
 		Level string `yaml:"level"`
 	} `yaml:"log"`
@@ -76,6 +123,11 @@ func DefaultServer() ServerConfig {
 	c.Metrics.HTTP = ":9100"
 	c.Scheduler.Interval = Duration(2 * time.Second)
 	c.Jobs.LogsDir = "job-logs"
+	c.Notify.Channels = []string{"log"}
+	c.Notify.Detector.Interval = Duration(15 * time.Second)
+	c.Notify.Detector.DiskThreshold = 0.9
+	c.Notify.Detector.DeviceIdleUtil = 0.05
+	c.Notify.Detector.DeviceIdleDuration = Duration(30 * time.Minute)
 	c.Heartbeat.Timeout = Duration(30 * time.Second)
 	c.Heartbeat.ReapInterval = Duration(10 * time.Second)
 	c.Log.Level = "info"

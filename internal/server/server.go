@@ -4,6 +4,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net"
 	"net/http"
@@ -13,7 +14,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	skipperv1 "github.com/yqwu905/psychic-funicular/gen/skipper/v1"
 	"github.com/yqwu905/psychic-funicular/internal/config"
+	"github.com/yqwu905/psychic-funicular/internal/event"
 	"github.com/yqwu905/psychic-funicular/internal/metrics"
+	"github.com/yqwu905/psychic-funicular/internal/notify"
 	"github.com/yqwu905/psychic-funicular/internal/scheduler"
 	"github.com/yqwu905/psychic-funicular/internal/store"
 	"github.com/yqwu905/psychic-funicular/internal/transport"
@@ -26,12 +29,17 @@ type Server struct {
 	log     *slog.Logger
 	store   store.Store
 	metrics *metrics.Store
+	events  *notify.Engine
 	grpc    *grpc.Server
 }
 
 // New 创建一个 Server。
 func New(cfg config.ServerConfig, logger *slog.Logger, st store.Store) *Server {
-	return &Server{cfg: cfg, log: logger, store: st, metrics: metrics.New()}
+	return &Server{
+		cfg: cfg, log: logger, store: st,
+		metrics: metrics.New(),
+		events:  notify.New(cfg.Notify, st, logger),
+	}
 }
 
 // Run 启动 gRPC 监听、Prometheus 端点与失联巡检，阻塞直到 ctx 取消或出错。
@@ -47,11 +55,14 @@ func (s *Server) Run(ctx context.Context) error {
 	}
 
 	s.grpc = grpc.NewServer()
-	skipperv1.RegisterAgentServiceServer(s.grpc, &agentService{store: s.store, metricsStore: s.metrics, jobLogs: jobLogs, log: s.log})
+	skipperv1.RegisterAgentServiceServer(s.grpc, &agentService{store: s.store, metricsStore: s.metrics, jobLogs: jobLogs, events: s.events, log: s.log})
 	skipperv1.RegisterClusterServiceServer(s.grpc, &clusterService{store: s.store, metricsStore: s.metrics, jobLogs: jobLogs, log: s.log})
 
 	sched := scheduler.New(s.store, s.log, s.cfg.Scheduler.Interval.Std())
 	go sched.Run(ctx)
+
+	detector := notify.NewDetector(s.store, s.metrics, s.events, s.cfg.Notify, s.log)
+	go detector.Run(ctx)
 
 	s.startSSHTunnels(ctx)
 
@@ -116,7 +127,9 @@ func (s *Server) reapLoop(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			n, err := s.store.MarkStaleDown(ctx, time.Now().Add(-timeout))
+			cutoff := time.Now().Add(-timeout)
+			s.emitNodeDownEvents(ctx, cutoff)
+			n, err := s.store.MarkStaleDown(ctx, cutoff)
 			if err != nil {
 				s.log.Error("reap stale nodes", "err", err)
 				continue
@@ -125,6 +138,25 @@ func (s *Server) reapLoop(ctx context.Context) {
 				s.log.Warn("marked nodes down due to missed heartbeat", "count", n)
 			}
 		}
+	}
+}
+
+// emitNodeDownEvents 对即将判定失联的 UP 节点(心跳早于 cutoff)发 node.down 事件。
+func (s *Server) emitNodeDownEvents(ctx context.Context, cutoff time.Time) {
+	nodes, err := s.store.ListNodes(ctx)
+	if err != nil {
+		return
+	}
+	for _, n := range nodes {
+		if n.State != store.StateUp || n.LastHeartbeat.IsZero() || !n.LastHeartbeat.Before(cutoff) {
+			continue
+		}
+		s.events.Emit(ctx, event.Event{
+			Type: event.TypeNodeDown, Severity: event.SevWarning, Source: n.Name,
+			Summary:  fmt.Sprintf("节点 %s 心跳超时，判定失联", n.Name),
+			DedupKey: "node-down|" + n.Name,
+			Labels:   map[string]string{"node": n.Name},
+		})
 	}
 }
 

@@ -7,6 +7,7 @@ import (
 
 	skipperv1 "github.com/yqwu905/psychic-funicular/gen/skipper/v1"
 	"github.com/yqwu905/psychic-funicular/internal/metrics"
+	"github.com/yqwu905/psychic-funicular/internal/notify"
 	"github.com/yqwu905/psychic-funicular/internal/store"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/peer"
@@ -19,6 +20,7 @@ type agentService struct {
 	store        store.Store
 	metricsStore *metrics.Store
 	jobLogs      *jobLogStore
+	events       *notify.Engine
 	log          *slog.Logger
 }
 

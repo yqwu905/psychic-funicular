@@ -5,6 +5,7 @@ package skipper.v1;
 import "skipper/v1/common.proto";
 import "skipper/v1/metrics.proto";
 import "skipper/v1/job.proto";
+import "skipper/v1/events.proto";
 
 option go_package = "github.com/yqwu905/psychic-funicular/gen/skipper/v1;skipperv1";
 
@@ -20,6 +21,10 @@ service ClusterService {
   rpc GetJob(GetJobRequest) returns (Job);
   rpc CancelJob(CancelJobRequest) returns (CancelJobResponse);
   rpc GetJobLogs(GetJobLogsRequest) returns (stream LogChunk);
+
+  // 事件与通知。
+  rpc ListEvents(ListEventsRequest) returns (ListEventsResponse);
+  rpc ListNotifications(ListNotificationsRequest) returns (ListNotificationsResponse);
 }
 
 message ListNodesRequest {}
@@ -82,4 +87,20 @@ message CancelJobResponse {
 message GetJobLogsRequest {
   string job_id = 1;
   bool follow = 2;
+}
+
+message ListEventsRequest {
+  int32 limit = 1;
+}
+
+message ListEventsResponse {
+  repeated Event events = 1;
+}
+
+message ListNotificationsRequest {
+  int32 limit = 1;
+}
+
+message ListNotificationsResponse {
+  repeated Notification notifications = 1;
 }

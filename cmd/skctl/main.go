@@ -48,6 +48,10 @@ func main() {
 		err = cmdCancel(*server, args[1:])
 	case "logs":
 		err = cmdLogs(*server, args[1:])
+	case "events":
+		err = cmdEvents(*server)
+	case "notifications", "notify":
+		err = cmdNotifications(*server)
 	case "version":
 		fmt.Println("skctl", version.Version)
 	default:
@@ -76,6 +80,8 @@ func usage() {
   queue [--state S] [--me]    查看作业队列
   cancel <jobid>              取消作业
   logs [-f] <jobid>           查看/跟踪作业日志
+  events                      查看最近事件(硬盘满/设备空置/任务结束/节点失联)
+  notifications               查看最近通知投递记录
   version                     打印版本
 
 submit 参数:
@@ -325,7 +331,63 @@ func cmdLogs(server string, args []string) error {
 	}
 }
 
+func cmdEvents(server string) error {
+	conn, err := dial(server)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	ctx, cancel := timeoutCtx()
+	defer cancel()
+	resp, err := skipperv1.NewClusterServiceClient(conn).ListEvents(ctx, &skipperv1.ListEventsRequest{Limit: 50})
+	if err != nil {
+		return err
+	}
+	tw := newTable()
+	fmt.Fprintln(tw, "TIME\tSEVERITY\tTYPE\tSOURCE\tSUMMARY")
+	for _, e := range resp.GetEvents() {
+		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\n",
+			tsShort(e.GetTimeUnix()), e.GetSeverity(), e.GetType(), e.GetSource(), e.GetSummary())
+	}
+	if len(resp.GetEvents()) == 0 {
+		fmt.Fprintln(tw, "(no events)")
+	}
+	return tw.Flush()
+}
+
+func cmdNotifications(server string) error {
+	conn, err := dial(server)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	ctx, cancel := timeoutCtx()
+	defer cancel()
+	resp, err := skipperv1.NewClusterServiceClient(conn).ListNotifications(ctx, &skipperv1.ListNotificationsRequest{Limit: 50})
+	if err != nil {
+		return err
+	}
+	tw := newTable()
+	fmt.Fprintln(tw, "TIME\tTYPE\tCHANNEL\tTO\tSTATUS\tSUMMARY")
+	for _, n := range resp.GetNotifications() {
+		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%s\n",
+			tsShort(n.GetTimeUnix()), n.GetEventType(), n.GetChannel(),
+			dash(n.GetRecipients()), n.GetStatus(), n.GetSummary())
+	}
+	if len(resp.GetNotifications()) == 0 {
+		fmt.Fprintln(tw, "(no notifications)")
+	}
+	return tw.Flush()
+}
+
 // --- helpers ---
+
+func tsShort(unix int64) string {
+	if unix <= 0 {
+		return "-"
+	}
+	return time.Unix(unix, 0).Format("15:04:05")
+}
 
 func listMetrics(server string) ([]*skipperv1.NodeMetrics, error) {
 	conn, err := dial(server)

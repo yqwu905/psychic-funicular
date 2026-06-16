@@ -10,6 +10,14 @@ scheduler:
   interval: "2s"        # 调度循环周期
 jobs:
   logs_dir: "job-logs"  # 作业日志存储目录
+notify:
+  channels: [log]       # 内置 log sink；真实渠道(飞书/邮件)由使用方实现 Notifier 接口接入
+  detector:
+    interval: "15s"
+    disk_threshold: 0.9         # 使用率超过该比例 -> disk.full
+    device_idle_util: 0.05      # 利用率低于此 且
+    device_idle_duration: "30m" # 持续超过此时长 -> device.idle
+  # rules 留空 = 内置默认(磁盘满->admins / 任务结束->提交者 / 设备空置->占用者或admins / 节点失联->admins)
 heartbeat:
   timeout: "30s"        # 超过该时长未心跳则判定节点 DOWN
   reap_interval: "10s"  # 失联巡检周期

@@ -61,7 +61,7 @@ flowchart LR
 
 ## 仓库结构
 
-`✅` 已实现（M0–M3）；其余为后续里程碑规划。
+`✅` 已实现（M0–M4）；其余为后续里程碑规划。
 
 ```
 .
@@ -80,7 +80,8 @@ flowchart LR
 │   ├── metrics/             # ✅ 近线指标存储（最新快照）
 │   ├── scheduler/           # ✅ FIFO+优先级调度（纯函数 Plan + 调度循环）
 │   ├── transport/           # ✅ SSH 反向隧道（仅开放 SSH 端口的容器，端口不限 22）
-│   └── notify/              #    事件引擎 + 通知器接口（M4）
+│   ├── notify/              # ✅ 事件引擎 + 检测器 + 可插拔通知器接口
+│   └── event/               # ✅ 事件/通知数据模型
 ├── api/proto/               # ✅ .proto 接口契约
 ├── gen/                     # ✅ 生成的 gRPC 代码（已提交）
 ├── deploy/                  # ✅ 示例配置、Dockerfile、docker-compose
@@ -139,7 +140,11 @@ make build            # 或 go build -o bin/ ./cmd/...
 ./bin/skctl logs -f <jobid>      # 跟踪作业日志
 ./bin/skctl cancel <jobid>       # 取消作业
 
-# 6) Prometheus 指标端点
+# 6) 事件与通知（硬盘满 / 设备空置 / 任务结束 / 节点失联）
+./bin/skctl events               # 最近事件
+./bin/skctl notifications        # 通知投递记录
+
+# 7) Prometheus 指标端点
 curl -s localhost:9100/metrics | grep '^skipper_'
 ```
 
@@ -148,13 +153,15 @@ curl -s localhost:9100/metrics | grep '^skipper_'
 
 ## 当前状态
 
-✅ **M0 骨架 + M1 监控 + M2 调度 + M3 SSH 传输 已完成**：
+✅ **M0–M4 已完成——最初的 5 个诉求全部跑通**：
 - **M0**：gRPC 骨架、配置/日志、SQLite 存储、注册/心跳、失联巡检、CI、容器化。
-- **M1**：CPU/内存/磁盘 + GPU(nvidia-smi)/NPU(npu-smi) 采集、Prometheus `/metrics`、`skctl top/gpu/npu`。
-- **M2**：作业模型与状态机、FIFO+优先级调度、单节点执行（设备隔离 `CUDA/ASCEND_VISIBLE_DEVICES`
+- **M1**（②监控）：CPU/内存/磁盘 + GPU(nvidia-smi)/NPU(npu-smi) 采集、Prometheus `/metrics`、`skctl top/gpu/npu`。
+- **M2**（③调度）：作业模型与状态机、FIFO+优先级调度、单节点执行（设备隔离 `CUDA/ASCEND_VISIBLE_DEVICES`
   + walltime + 日志捕获 + 退出码）、`skctl submit/queue/cancel/logs`。
-- **M3**：SSH 反向隧道，纳管「仅开放 SSH 端口」的容器（**端口任意，不限 22**）；主机公钥校验、
-  断线重连、保活。已用真实 sshd(2222) 端到端验证：注册/调度/执行/日志全走 SSH 连接。
+- **M3**（④SSH 通信）：SSH 反向隧道，纳管「仅开放 SSH 端口」的容器（**端口任意，不限 22**）；
+  主机公钥校验、断线重连、保活。真实 sshd(2222) 端到端验证。
+- **M4**（⑤通知）：事件引擎 + 检测器 + 规则路由 + **可插拔通知器接口**，覆盖硬盘满 / 设备空置
+  （区分已分配/空闲）/ 任务结束 / 节点失联；去重/冷却；`skctl events/notifications`。
 
-🚧 下一步 **M4 事件与通知**：事件引擎 + 规则路由 + 通知器接口，覆盖硬盘满 / 设备空置 / 任务结束。
-里程碑详见 [docs/ROADMAP.md](docs/ROADMAP.md)。
+🚧 后续增强见 **M5**（NPU 调度、Backfill、公平份额、cgroup 硬限额、Web/HA），详见
+[docs/ROADMAP.md](docs/ROADMAP.md)。

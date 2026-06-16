@@ -164,3 +164,16 @@ Agent 采样: gpu0 util=0%, 已分配给 job#42(owner=alice), 持续 35min
   → 交给使用方注册的通知器投递
   → 通知调度器投递 → 记录 Delivery，冷却 2h
 ```
+
+## 8. 实现现状（M4 已落地）
+
+- **检测集中在控制平面**：`internal/notify/detector.go` 周期扫描每节点最新指标 + 作业分配，
+  产出 `disk.full`/`disk.recovered`、`device.idle`（join 分配信息区分「已分配→占用者」与
+  「空闲→管理员」）；无需改 Agent。`job.completed`/`job.failed` 由作业终态触发，`node.down`
+  由失联巡检触发。
+- **引擎**：`internal/notify/engine.go` 做规则匹配 + 去重/冷却 + 投递 + 记录；事件与通知落库，
+  经 `skctl events` / `skctl notifications` 查询。
+- **通知器**：只内置 `log` 默认 sink（便于观测/自检），**不含任何真实渠道**；使用方实现
+  `Notifier` 接口并 `engine.Register(...)` 即可接入飞书/邮件等——内部实现通常很简单。
+- **规则**：配置化（`server.yaml` 的 `notify.rules`），支持 `${label}` 动态接收人；留空则用内置默认规则。
+- **后续**：用户联系方式/偏好映射、`skctl notify test`、真实渠道实现（使用方侧）。

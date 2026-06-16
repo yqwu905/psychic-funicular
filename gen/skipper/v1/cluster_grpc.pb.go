@@ -19,13 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ClusterService_ListNodes_FullMethodName   = "/skipper.v1.ClusterService/ListNodes"
-	ClusterService_ListMetrics_FullMethodName = "/skipper.v1.ClusterService/ListMetrics"
-	ClusterService_SubmitJob_FullMethodName   = "/skipper.v1.ClusterService/SubmitJob"
-	ClusterService_ListJobs_FullMethodName    = "/skipper.v1.ClusterService/ListJobs"
-	ClusterService_GetJob_FullMethodName      = "/skipper.v1.ClusterService/GetJob"
-	ClusterService_CancelJob_FullMethodName   = "/skipper.v1.ClusterService/CancelJob"
-	ClusterService_GetJobLogs_FullMethodName  = "/skipper.v1.ClusterService/GetJobLogs"
+	ClusterService_ListNodes_FullMethodName         = "/skipper.v1.ClusterService/ListNodes"
+	ClusterService_ListMetrics_FullMethodName       = "/skipper.v1.ClusterService/ListMetrics"
+	ClusterService_SubmitJob_FullMethodName         = "/skipper.v1.ClusterService/SubmitJob"
+	ClusterService_ListJobs_FullMethodName          = "/skipper.v1.ClusterService/ListJobs"
+	ClusterService_GetJob_FullMethodName            = "/skipper.v1.ClusterService/GetJob"
+	ClusterService_CancelJob_FullMethodName         = "/skipper.v1.ClusterService/CancelJob"
+	ClusterService_GetJobLogs_FullMethodName        = "/skipper.v1.ClusterService/GetJobLogs"
+	ClusterService_ListEvents_FullMethodName        = "/skipper.v1.ClusterService/ListEvents"
+	ClusterService_ListNotifications_FullMethodName = "/skipper.v1.ClusterService/ListNotifications"
 )
 
 // ClusterServiceClient is the client API for ClusterService service.
@@ -43,6 +45,9 @@ type ClusterServiceClient interface {
 	GetJob(ctx context.Context, in *GetJobRequest, opts ...grpc.CallOption) (*Job, error)
 	CancelJob(ctx context.Context, in *CancelJobRequest, opts ...grpc.CallOption) (*CancelJobResponse, error)
 	GetJobLogs(ctx context.Context, in *GetJobLogsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LogChunk], error)
+	// 事件与通知。
+	ListEvents(ctx context.Context, in *ListEventsRequest, opts ...grpc.CallOption) (*ListEventsResponse, error)
+	ListNotifications(ctx context.Context, in *ListNotificationsRequest, opts ...grpc.CallOption) (*ListNotificationsResponse, error)
 }
 
 type clusterServiceClient struct {
@@ -132,6 +137,26 @@ func (c *clusterServiceClient) GetJobLogs(ctx context.Context, in *GetJobLogsReq
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type ClusterService_GetJobLogsClient = grpc.ServerStreamingClient[LogChunk]
 
+func (c *clusterServiceClient) ListEvents(ctx context.Context, in *ListEventsRequest, opts ...grpc.CallOption) (*ListEventsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListEventsResponse)
+	err := c.cc.Invoke(ctx, ClusterService_ListEvents_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *clusterServiceClient) ListNotifications(ctx context.Context, in *ListNotificationsRequest, opts ...grpc.CallOption) (*ListNotificationsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListNotificationsResponse)
+	err := c.cc.Invoke(ctx, ClusterService_ListNotifications_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ClusterServiceServer is the server API for ClusterService service.
 // All implementations must embed UnimplementedClusterServiceServer
 // for forward compatibility.
@@ -147,6 +172,9 @@ type ClusterServiceServer interface {
 	GetJob(context.Context, *GetJobRequest) (*Job, error)
 	CancelJob(context.Context, *CancelJobRequest) (*CancelJobResponse, error)
 	GetJobLogs(*GetJobLogsRequest, grpc.ServerStreamingServer[LogChunk]) error
+	// 事件与通知。
+	ListEvents(context.Context, *ListEventsRequest) (*ListEventsResponse, error)
+	ListNotifications(context.Context, *ListNotificationsRequest) (*ListNotificationsResponse, error)
 	mustEmbedUnimplementedClusterServiceServer()
 }
 
@@ -177,6 +205,12 @@ func (UnimplementedClusterServiceServer) CancelJob(context.Context, *CancelJobRe
 }
 func (UnimplementedClusterServiceServer) GetJobLogs(*GetJobLogsRequest, grpc.ServerStreamingServer[LogChunk]) error {
 	return status.Error(codes.Unimplemented, "method GetJobLogs not implemented")
+}
+func (UnimplementedClusterServiceServer) ListEvents(context.Context, *ListEventsRequest) (*ListEventsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListEvents not implemented")
+}
+func (UnimplementedClusterServiceServer) ListNotifications(context.Context, *ListNotificationsRequest) (*ListNotificationsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListNotifications not implemented")
 }
 func (UnimplementedClusterServiceServer) mustEmbedUnimplementedClusterServiceServer() {}
 func (UnimplementedClusterServiceServer) testEmbeddedByValue()                        {}
@@ -318,6 +352,42 @@ func _ClusterService_GetJobLogs_Handler(srv interface{}, stream grpc.ServerStrea
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type ClusterService_GetJobLogsServer = grpc.ServerStreamingServer[LogChunk]
 
+func _ClusterService_ListEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListEventsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClusterServiceServer).ListEvents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ClusterService_ListEvents_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClusterServiceServer).ListEvents(ctx, req.(*ListEventsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ClusterService_ListNotifications_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListNotificationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClusterServiceServer).ListNotifications(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ClusterService_ListNotifications_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClusterServiceServer).ListNotifications(ctx, req.(*ListNotificationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ClusterService_ServiceDesc is the grpc.ServiceDesc for ClusterService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -348,6 +418,14 @@ var ClusterService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CancelJob",
 			Handler:    _ClusterService_CancelJob_Handler,
+		},
+		{
+			MethodName: "ListEvents",
+			Handler:    _ClusterService_ListEvents_Handler,
+		},
+		{
+			MethodName: "ListNotifications",
+			Handler:    _ClusterService_ListNotifications_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

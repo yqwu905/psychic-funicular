@@ -6,6 +6,8 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"time"
+
+	"github.com/yqwu905/psychic-funicular/internal/event"
 )
 
 // 节点状态常量。
@@ -75,6 +77,17 @@ type Store interface {
 	FinishJob(ctx context.Context, jobID, state string, exitCode int32, reason string, t time.Time) error
 	// CancelJob 取消作业：PENDING 直接置 CANCELLED；ASSIGNED/RUNNING 置 CANCELLING。返回新状态。
 	CancelJob(ctx context.Context, jobID string) (newState string, err error)
+
+	// --- 事件与通知 ---
+
+	// CreateEvent 落库一个事件。
+	CreateEvent(ctx context.Context, e *event.Event) error
+	// ListEvents 返回最近的事件(按时间倒序，最多 limit 条)。
+	ListEvents(ctx context.Context, limit int) ([]*event.Event, error)
+	// CreateNotification 落库一条通知投递记录。
+	CreateNotification(ctx context.Context, n *event.Notification) error
+	// ListNotifications 返回最近的通知记录(按时间倒序，最多 limit 条)。
+	ListNotifications(ctx context.Context, limit int) ([]*event.Notification, error)
 
 	// Close 释放底层资源。
 	Close() error
