@@ -60,6 +60,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION }}
+          # 手动触发(workflow_dispatch)时标签尚不存在，须显式指定目标提交，
+          # 否则 action-gh-release 会把标签建到仓库默认分支而非本次构建的提交。
+          target_commitish: ${{ github.sha }}
           name: ${{ env.VERSION }}
           generate_release_notes: true
           files: |
