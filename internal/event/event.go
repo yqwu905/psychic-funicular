@@ -20,6 +20,7 @@ const (
 	TypeJobCompleted  = "job.completed"
 	TypeJobFailed     = "job.failed"
 	TypeNodeDown      = "node.down"
+	TypeNodeDiagnosed = "node.diagnosed"
 )
 
 // Event 是一次事件。
