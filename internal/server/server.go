@@ -23,6 +23,12 @@ import (
 	"google.golang.org/grpc"
 )
 
+// SSH 节点的默认回环监听地址与 agent 推送路径。
+const (
+	defaultRemoteListen = "127.0.0.1:7600"
+	defaultRemotePath   = "/tmp/skipper-agent"
+)
+
 // Server 是控制平面实例。
 type Server struct {
 	cfg     config.ServerConfig
@@ -31,6 +37,7 @@ type Server struct {
 	metrics *metrics.Store
 	events  *notify.Engine
 	grpc    *grpc.Server
+	diag    *diagnoser // 经 SSH 纳管节点的失联诊断；未启用时为 nil
 }
 
 // New 创建一个 Server。
@@ -66,6 +73,13 @@ func (s *Server) Run(ctx context.Context) error {
 	go detector.Run(ctx)
 
 	s.startSSHTunnels(ctx)
+
+	if s.cfg.Diagnostics.Enabled && len(s.cfg.SSHNodes) > 0 {
+		s.diag = newDiagnoser(s.store, s.events, s.cfg, s.log)
+		s.log.Info("node failure diagnostics enabled",
+			"after_down", s.cfg.Diagnostics.AfterDown.Std().String(),
+			"cooldown", s.cfg.Diagnostics.Cooldown.Std().String())
+	}
 
 	go s.reapLoop(ctx)
 	stopHTTP := s.startMetricsHTTP()
@@ -153,8 +167,14 @@ func (s *Server) reapLoop(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			cutoff := time.Now().Add(-timeout)
-			s.emitNodeDownEvents(ctx, cutoff)
+			now := time.Now()
+			cutoff := now.Add(-timeout)
+			nodes, err := s.store.ListNodes(ctx)
+			if err != nil {
+				s.log.Error("reap: list nodes", "err", err)
+				continue
+			}
+			s.emitNodeDownEvents(ctx, nodes, cutoff)
 			n, err := s.store.MarkStaleDown(ctx, cutoff)
 			if err != nil {
 				s.log.Error("reap stale nodes", "err", err)
@@ -163,16 +183,15 @@ func (s *Server) reapLoop(ctx context.Context) {
 			if n > 0 {
 				s.log.Warn("marked nodes down due to missed heartbeat", "count", n)
 			}
+			if s.diag != nil {
+				s.diag.check(ctx, nodes, now)
+			}
 		}
 	}
 }
 
 // emitNodeDownEvents 对即将判定失联的 UP 节点(心跳早于 cutoff)发 node.down 事件。
-func (s *Server) emitNodeDownEvents(ctx context.Context, cutoff time.Time) {
-	nodes, err := s.store.ListNodes(ctx)
-	if err != nil {
-		return
-	}
+func (s *Server) emitNodeDownEvents(ctx context.Context, nodes []*store.Node, cutoff time.Time) {
 	for _, n := range nodes {
 		if n.State != store.StateUp || n.LastHeartbeat.IsZero() || !n.LastHeartbeat.Before(cutoff) {
 			continue
@@ -186,24 +205,91 @@ func (s *Server) emitNodeDownEvents(ctx context.Context, cutoff time.Time) {
 	}
 }
 
-// startSSHTunnels 为配置中的 SSH 节点建立反向转发隧道（适配仅开放 SSH 端口的容器）。
+// startSSHTunnels 为配置中的 SSH 节点建立反向转发隧道（适配仅开放 SSH 端口的容器）；
+// 对开启 provision 的节点，在隧道就绪后自动分发并拉起 agent。
 func (s *Server) startSSHTunnels(ctx context.Context) {
 	if len(s.cfg.SSHNodes) == 0 {
 		return
 	}
 	forwardTo := localDialTarget(s.cfg.Listen.GRPC)
 	for _, sn := range s.cfg.SSHNodes {
-		rl := sn.RemoteListen
-		if rl == "" {
-			rl = "127.0.0.1:7600"
-		}
-		t := transport.NewSSHTunnel(transport.Config{
-			Name: sn.Name, Addr: sn.Addr, User: sn.User,
-			KeyPath: sn.Key, KnownHost: sn.KnownHost, RemoteListen: rl,
-		}, forwardTo, s.log)
+		sn := sn
+		t := transport.NewSSHTunnel(sshConfigFor(sn), forwardTo, s.log)
 		go t.Run(ctx)
+		if sn.Provision {
+			go s.provisionWhenReady(ctx, t, sn)
+		}
 	}
 	s.log.Info("ssh tunnels starting", "count", len(s.cfg.SSHNodes), "forward_to", forwardTo)
+}
+
+// provisionWhenReady 等隧道反向监听就绪后，把 agent 分发到节点并远程拉起（带退避重试）。
+func (s *Server) provisionWhenReady(ctx context.Context, t *transport.SSHTunnel, sn config.SSHNodeConfig) {
+	spec := provisionSpec(sn)
+	if spec.LocalBin == "" {
+		s.log.Error("provision enabled but agent_bin not set; skipping", "node", sn.Name)
+		return
+	}
+	select {
+	case <-ctx.Done():
+		return
+	case <-t.Ready():
+	}
+	backoff := 2 * time.Second
+	for attempt := 1; ; attempt++ {
+		if ctx.Err() != nil {
+			return
+		}
+		if err := transport.Provision(ctx, sshConfigFor(sn), spec, s.log); err == nil {
+			s.log.Info("agent provisioned", "node", sn.Name, "remote_path", spec.RemotePath, "attempt", attempt)
+			return
+		} else {
+			s.log.Warn("agent provision failed, will retry", "node", sn.Name, "err", err, "backoff", backoff)
+		}
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(backoff):
+		}
+		if backoff < 30*time.Second {
+			backoff *= 2
+		}
+	}
+}
+
+// sshConfigFor 把 SSHNodeConfig 转成传输层 SSH 配置（补全回环监听默认值）。
+func sshConfigFor(sn config.SSHNodeConfig) transport.Config {
+	rl := sn.RemoteListen
+	if rl == "" {
+		rl = defaultRemoteListen
+	}
+	return transport.Config{
+		Name: sn.Name, Addr: sn.Addr, User: sn.User,
+		KeyPath: sn.Key, KnownHost: sn.KnownHost, RemoteListen: rl,
+	}
+}
+
+// provisionSpec 由节点配置推导 agent 分发/拉起参数（补全路径默认值）。
+// agent 以 RemoteListen 为 --server（隧道回环），以节点名为 --name 便于失联诊断对应。
+func provisionSpec(sn config.SSHNodeConfig) transport.ProvisionSpec {
+	remotePath := sn.RemotePath
+	if remotePath == "" {
+		remotePath = defaultRemotePath
+	}
+	rl := sn.RemoteListen
+	if rl == "" {
+		rl = defaultRemoteListen
+	}
+	return transport.ProvisionSpec{
+		LocalBin:   sn.AgentBin,
+		RemotePath: remotePath,
+		ServerAddr: rl,
+		NodeName:   sn.Name,
+		Partition:  sn.Partition,
+		ExtraArgs:  sn.AgentArgs,
+		LogPath:    remotePath + ".log",
+		PidPath:    remotePath + ".pid",
+	}
 }
 
 // localDialTarget 把监听地址(可能是 :7443 / 0.0.0.0:7443)转成可拨号的本地地址。

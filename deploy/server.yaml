@@ -25,11 +25,17 @@ notify:
 heartbeat:
   timeout: "30s"        # 超过该时长未心跳则判定节点 DOWN
   reap_interval: "10s"  # 失联巡检周期
+diagnostics:
+  enabled: true         # 经 SSH 纳管的节点失联后做基本诊断(SSH 连接中断/agent 进程被杀/其他)
+  after_down: "60s"     # 距上次心跳超过此时长后开始诊断(建议大于 heartbeat.timeout)
+  cooldown: "2m"        # 同一节点两次诊断的最小间隔(应大于 SSH 超时约 10s)
 log:
   level: "info"         # debug | info | warn | error
 
 # 经 SSH 隧道纳管「仅开放 SSH 端口」的容器（SSH 端口任意，不限 22）。
 # 控制平面 SSH 进容器并反向转发，Agent 在容器内用 --server 指向 remote_listen。
+# 开启 provision 后，控制平面会在隧道就绪时经 SCP 把 agent 推送到容器并远程拉起，
+# 失联诊断据此判断进程是否被杀；auto_restart 命中「进程被杀」时自动重新分发拉起。
 # ssh_nodes:
 #   - name: gpu-docker-07
 #     addr: "gpu-host-07:2207"            # 容器 sshd 可达地址(反代/映射后的任意端口)
@@ -37,3 +43,9 @@ log:
 #     key: "/etc/skipper/keys/node07"     # SSH 私钥
 #     known_host: "ssh-ed25519 AAAA..."   # 主机公钥(ssh-keyscan -p 2207 host)；空则跳过校验(不安全)
 #     remote_listen: "127.0.0.1:7600"     # 容器内回环端口，Agent 用 --server 指向它
+#     provision: true                     # 自动分发并拉起 agent(免去手动 scp + 启动)
+#     agent_bin: "/etc/skipper/bin/skipper-agent-arm64"  # 控制平面侧 agent 二进制(按目标架构选)
+#     remote_path: "/tmp/skipper-agent"   # 推送到容器内的路径(默认即此)
+#     partition: "gpu"                    # 拉起 agent 时使用的分区
+#     agent_args: ""                      # 透传给 agent 的额外参数(如 --labels rack=a1)
+#     auto_restart: true                  # 诊断为「agent 进程被杀」时自动重新拉起

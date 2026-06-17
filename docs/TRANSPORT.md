@@ -96,7 +96,8 @@ ssh_nodes:
     remote_listen: "127.0.0.1:7600"   # Agent 用 --server 127.0.0.1:7600 连接
 ```
 
-> Agent 自举（推送二进制 + 远程启动）当前为手动步骤（`scp -P <port>` + 运行），自动化列为后续项。
+> Agent 自举（推送二进制 + 远程启动）已实现：配置 `provision: true` 后控制平面会在隧道就绪时
+> 经 SCP 把对应架构的 agent 推送到容器并远程拉起，见 §4。
 
 ## 3. 模式选择与配置
 
@@ -134,26 +135,76 @@ nodes:
         └──► 不可纳管（需至少一种可达路径）
 ```
 
-## 4. Agent 引导（SSH-only 容器）
+## 4. Agent 引导（SSH-only 容器）✅ 已实现
 
-对「只有 SSH」的容器，可做到**近似无 Agent 的自举**，类似 Ansible：
+对「只有 SSH」的容器，做到**近似无 Agent 的自举**，类似 Ansible。在 `ssh_nodes`
+节点上配置 `provision: true` 与 `agent_bin` 即可，控制平面自动完成：
 
 ```
-1. Server 经 SSH/SFTP 把对应架构的 skipper-agent 二进制推送到容器
-2. 经 SSH 启动：nohup skipper-agent --loopback 127.0.0.1:7070 --token ... &
-   （有 systemd 则注册为服务；无则用进程管理/重启守护）
-3. Server 通过 2.2 的 SSH 本地转发与之建立 gRPC，完成注册
+1. 隧道就绪(反向监听建立)后，Server 经 SCP(等价 scp -t)把 agent_bin 推送到容器 remote_path
+2. 经 SSH 远程拉起：nohup <remote_path> --server <remote_listen> --name <name> [--partition ...] \
+     </dev/null >remote_path.log 2>&1 & echo $! > remote_path.pid
+   （nohup 屏蔽 SIGHUP，pid 落盘供失联诊断；agent 自带断线退避重连）
+3. agent 经 §2.2 的回环端口回连控制平面 gRPC，完成注册
 4. 后续控制面流量全部走该隧道
 ```
 
-二进制随发布提供 amd64/arm64（arm64 便于昇腾环境），Server 按节点架构选择推送。
+要点：
+- **就绪后再分发**：先等隧道 `ssh -R` 的反向监听建立，再推送/拉起，避免 agent 首连扑空；
+  分发失败按指数退避重试。
+- **节点名对齐**：拉起时以 `--name <ssh_nodes.name>` 启动，使失联诊断能把 store 中的节点
+  对应回 SSH 配置。
+- **仅依赖 scp + sh/nohup**：除 SSH 外不需要任何额外端口、子系统或预装的 agent。
+- 二进制随发布提供 amd64/arm64（arm64 便于昇腾环境），Server 按节点架构选择 `agent_bin` 推送。
+
+```yaml
+# server 配置片段：自动分发并拉起 agent
+ssh_nodes:
+  - name: gpu-docker-07
+    addr: "gpu-host-07:2207"
+    user: root
+    key: "/etc/skipper/keys/node07"
+    known_host: "ssh-ed25519 AAAA..."
+    remote_listen: "127.0.0.1:7600"
+    provision: true
+    agent_bin: "/etc/skipper/bin/skipper-agent-arm64"  # 按目标架构选择
+    partition: "gpu"
+    auto_restart: true                                 # 进程被杀时自动重新拉起
+```
+
+## 4.1 失联诊断（agent down 的根因分类）✅ 已实现
+
+经 SSH 纳管的节点心跳超时被判 `DOWN` 后，仅知「连不上」不够；控制平面会在节点失联
+**持续一段时间**（`diagnostics.after_down`，默认 60s）后经 SSH 做一次基本诊断，把根因
+归为三类并作为 `node.diagnosed` 事件上报（`skctl events` 可见，默认路由给 admins）：
+
+| 结论 | 判据 | 含义 |
+| --- | --- | --- |
+| `ssh-down` | SSH 连接都建立不了 | 网络不可达 / 容器 sshd 挂掉 / 认证或主机指纹失败 |
+| `agent-killed` | SSH 正常，但 agent 进程不在 | 进程被杀 / 崩溃 / OOM（读 pid 文件 + `kill -0`，回退扫 `/proc`）|
+| `other` | SSH 正常且进程在，但仍无心跳 | 疑似隧道/回环异常、agent 卡死、时钟漂移等 |
+
+```mermaid
+flowchart TD
+    A[节点失联 after_down] --> B{SSH 能连上?}
+    B -- 否 --> S[ssh-down\nSSH 连接中断]
+    B -- 是 --> C{agent 进程存活?}
+    C -- 否 --> K[agent-killed\n进程被杀/崩溃/OOM]
+    C -- 是 --> O[other\n隧道/回环/卡死等]
+```
+
+- 诊断带冷却（`diagnostics.cooldown`，默认 2m），节点恢复心跳后冷却自动清零，下次失联即时诊断。
+- 进程存活探测优先用引导时写下的 pid 文件，失败再回退按二进制路径扫描 `/proc`，
+  兼容手动启动（无 pid 文件）的 agent。
+- 命中 `agent-killed` 且节点开启 `auto_restart` 时，控制平面复用引导流程**自动重新分发并拉起** agent。
 
 ## 5. 连接管理与可靠性
 
 - **保活与重连**：隧道/连接断开后指数退避重连；Agent 本地环形缓冲在断连期间暂存
   指标与状态，重连后补传，避免数据空洞。
 - **心跳**：Server 周期 ping；连续丢失判定节点 `DOWN` → 触发「节点失联」事件，
-  运行中作业按调度策略处理（重排/标记失败）。
+  运行中作业按调度策略处理（重排/标记失败）。失联持续一段时间后对 SSH 纳管节点做
+  根因诊断（SSH 连接中断 / agent 进程被杀 / 其他），见 §4.1。
 - **多路复用**：单条 SSH/gRPC 连接上承载心跳、指标流、日志流、命令下发等多路逻辑通道。
 - **背压**：日志/指标流采用带缓冲与丢弃策略，避免单节点拖垮 Server。
 

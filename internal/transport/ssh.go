@@ -14,6 +14,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -34,12 +35,22 @@ type SSHTunnel struct {
 	cfg       Config
 	forwardTo string // 控制平面本地 gRPC 拨号地址，如 127.0.0.1:7443
 	log       *slog.Logger
+	ready     chan struct{} // 反向监听首次建立时关闭，供「隧道就绪后再分发 agent」
+	readyOnce sync.Once
 }
 
 // NewSSHTunnel 创建一条隧道；forwardTo 是控制平面本地 gRPC 地址。
 func NewSSHTunnel(cfg Config, forwardTo string, log *slog.Logger) *SSHTunnel {
-	return &SSHTunnel{cfg: cfg, forwardTo: forwardTo, log: log.With("ssh_node", cfg.Name, "ssh_addr", cfg.Addr)}
+	return &SSHTunnel{
+		cfg: cfg, forwardTo: forwardTo,
+		log:   log.With("ssh_node", cfg.Name, "ssh_addr", cfg.Addr),
+		ready: make(chan struct{}),
+	}
 }
+
+// Ready 返回一个在反向监听首次建立时关闭的通道。Agent 经隧道的回环端口回连控制平面，
+// 故应在该通道关闭后再分发并拉起 agent，避免首个连接因隧道未就绪而失败。
+func (t *SSHTunnel) Ready() <-chan struct{} { return t.ready }
 
 // Run 持续维护隧道，阻塞直到 ctx 取消。
 func (t *SSHTunnel) Run(ctx context.Context) {
@@ -71,24 +82,9 @@ func (t *SSHTunnel) Run(ctx context.Context) {
 }
 
 func (t *SSHTunnel) serveOnce(ctx context.Context) error {
-	signer, err := loadSigner(t.cfg.KeyPath)
+	client, err := dialSSH(t.cfg, t.log)
 	if err != nil {
-		return fmt.Errorf("load key: %w", err)
-	}
-	hostKey, err := hostKeyCallback(t.cfg.KnownHost, t.log)
-	if err != nil {
-		return fmt.Errorf("host key: %w", err)
-	}
-	conf := &ssh.ClientConfig{
-		User:            t.cfg.User,
-		Auth:            []ssh.AuthMethod{ssh.PublicKeys(signer)},
-		HostKeyCallback: hostKey,
-		Timeout:         10 * time.Second,
-	}
-
-	client, err := ssh.Dial("tcp", t.cfg.Addr, conf)
-	if err != nil {
-		return fmt.Errorf("ssh dial: %w", err)
+		return err
 	}
 	defer client.Close()
 
@@ -99,6 +95,7 @@ func (t *SSHTunnel) serveOnce(ctx context.Context) error {
 	}
 	defer ln.Close()
 
+	t.readyOnce.Do(func() { close(t.ready) })
 	t.log.Info("ssh tunnel established", "remote_listen", t.cfg.RemoteListen, "forward_to", t.forwardTo)
 
 	// ctx 取消或保活失败时关闭，使 Accept 返回。
@@ -153,6 +150,30 @@ func (t *SSHTunnel) keepalive(client *ssh.Client, stop <-chan struct{}) {
 			}
 		}
 	}
+}
+
+// dialSSH 按 Config 建立一条 SSH 客户端连接（密钥认证 + 主机指纹校验）。
+// 隧道、agent 分发与失联诊断共用此拨号逻辑。
+func dialSSH(cfg Config, log *slog.Logger) (*ssh.Client, error) {
+	signer, err := loadSigner(cfg.KeyPath)
+	if err != nil {
+		return nil, fmt.Errorf("load key: %w", err)
+	}
+	hostKey, err := hostKeyCallback(cfg.KnownHost, log)
+	if err != nil {
+		return nil, fmt.Errorf("host key: %w", err)
+	}
+	conf := &ssh.ClientConfig{
+		User:            cfg.User,
+		Auth:            []ssh.AuthMethod{ssh.PublicKeys(signer)},
+		HostKeyCallback: hostKey,
+		Timeout:         10 * time.Second,
+	}
+	client, err := ssh.Dial("tcp", cfg.Addr, conf)
+	if err != nil {
+		return nil, fmt.Errorf("ssh dial: %w", err)
+	}
+	return client, nil
 }
 
 func loadSigner(path string) (ssh.Signer, error) {

@@ -77,5 +77,7 @@ func DefaultRules() []config.NotifyRule {
 			To: []string{"admins"}, Cooldown: config.Duration(2 * time.Hour)},
 		{Name: "node-down", Match: config.RuleMatch{Type: []string{event.TypeNodeDown}},
 			To: []string{"admins"}, Cooldown: config.Duration(10 * time.Minute)},
+		{Name: "node-diagnosed", Match: config.RuleMatch{Type: []string{event.TypeNodeDiagnosed}},
+			To: []string{"admins"}, Cooldown: config.Duration(10 * time.Minute)},
 	}
 }

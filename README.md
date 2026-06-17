@@ -73,13 +73,13 @@ flowchart LR
 │   ├── config/              # ✅ 配置加载（YAML + 环境变量）
 │   ├── log/                 # ✅ 结构化日志
 │   ├── version/             # ✅ 版本信息
-│   ├── server/              # ✅ gRPC 服务、节点注册、失联巡检
+│   ├── server/              # ✅ gRPC 服务、节点注册、失联巡检 + 失联诊断
 │   ├── agent/               # ✅ 资源采集、注册、心跳
 │   ├── store/               # ✅ 持久化接口 + SQLite 实现
 │   ├── collector/           # ✅ CPU/内存/磁盘 + GPU(nvidia)/NPU(ascend) 采集
 │   ├── metrics/             # ✅ 近线指标存储（最新快照）
 │   ├── scheduler/           # ✅ FIFO+优先级调度（纯函数 Plan + 调度循环）
-│   ├── transport/           # ✅ SSH 反向隧道（仅开放 SSH 端口的容器，端口不限 22）
+│   ├── transport/           # ✅ SSH 反向隧道 + agent 自举(SCP 分发/拉起) + 失联诊断
 │   ├── notify/              # ✅ 事件引擎 + 检测器 + 可插拔通知器接口
 │   ├── event/               # ✅ 事件/通知数据模型
 │   └── webui/               # ✅ Web 控制台（内嵌 SPA + JSON API 静态资源）
@@ -172,6 +172,9 @@ curl -s localhost:8080/api/v1/events       # 事件流
   + walltime + 日志捕获 + 退出码）、`skctl submit/queue/cancel/logs`。
 - **M3**（④SSH 通信）：SSH 反向隧道，纳管「仅开放 SSH 端口」的容器（**端口任意，不限 22**）；
   主机公钥校验、断线重连、保活。真实 sshd(2222) 端到端验证。
+- **M3.1**（自举 + 诊断）：`provision` 经 SCP 自动分发并远程拉起 agent；节点失联持续一段时间后
+  经 SSH 诊断根因（**SSH 连接中断 / agent 进程被杀 / 其他原因**），发 `node.diagnosed` 事件，
+  可选 `auto_restart` 自动重拉。
 - **M4**（⑤通知）：事件引擎 + 检测器 + 规则路由 + **可插拔通知器接口**，覆盖硬盘满 / 设备空置
   （区分已分配/空闲）/ 任务结束 / 节点失联；去重/冷却；`skctl events/notifications`。
 
